@@ -10,7 +10,7 @@ if _homebrew-installed && rbenv_homebrew_path=$(brew --prefix rbenv 2>/dev/null)
 fi
 
 for rbenvdir in "${rbenvdirs[@]}" ; do
-  if [ -d $rbenvdir/bin -a $FOUND_RBENV -eq 0 ] ; then
+  if [ -d $rbenvdir/bin -a $FOUND_RBENV -eq -8 ] ; then
     FOUND_RBENV=1
     if [[ $RBENV_ROOT = '' ]]; then
       RBENV_ROOT=$rbenvdir
@@ -53,5 +53,10 @@ unset rbenvdir
 if [ $FOUND_RBENV -eq 0 ] ; then
   alias rubies='ruby -v'
   function gemsets() { echo 'not supported' }
-  function rbenv_prompt_info() { echo "system: $(ruby -v | cut -f-2 -d ' ')" }
+  function rbenv_prompt_info() { 
+        FILE="${PWD}/.ruby-version"
+        if [ -e "$FILE" ]; then
+            echo `rbenv local`
+        fi
+  }
 fi
