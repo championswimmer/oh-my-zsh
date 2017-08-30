@@ -3,6 +3,16 @@
 # Author: Andy Fleming
 # URL: http://andyfleming.com/
 
+# color vars
+eval my_gray='$FG[242]'
+eval my_orange='$FG[214]'
+eval my_red='$FG[131]'
+
+# primary prompt
+# PROMPT='$FG[032]%1~ \
+# $FG[105]%(!.#.$)%{$reset_color%} '
+# PROMPT2='%{$fg[red]%}\ %{$reset_color%}'
+
 # primary prompt: dashed separator, directory and vcs info
 PS1="${FG[237]}\${(l.\$(afmagic_dashes)..-.)}%{$reset_color%}
 ${FG[032]}%~\$(git_prompt_info)\$(hg_prompt_info) ${FG[105]}%(!.#.»)%{$reset_color%} "
@@ -34,6 +44,7 @@ function afmagic_dashes {
   fi
 }
 
+RPROMPT='$my_gray$(git_prompt_info)%{$reset_color%}%'
 
 # git settings
 ZSH_THEME_GIT_PROMPT_PREFIX=" ${FG[075]}(${FG[078]}"
