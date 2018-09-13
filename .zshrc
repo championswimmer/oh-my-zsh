@@ -93,7 +93,7 @@ autoload -U compinit && compinit
 alias pg_start='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper start';
 alias pg_stop='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper stop';
 alias pg_restart='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper restart';
-alias bash='/opt/local/bin/bash -l'
+alias bash='/usr/local/bin/bash -l'
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -106,7 +106,17 @@ alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 
 eval "$(rbenv init -)" 
 
-export PATH="$HOME/.yarn/bin:$PATH"
-
 export NVM_AUTO_USE=true
 
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/Users/championswimmer/.sdkman"
+[[ -s "/Users/championswimmer/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/championswimmer/.sdkman/bin/sdkman-init.sh"
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
+
+###-tns-completion-start-###
+if [ -f /Users/championswimmer/.tnsrc ]; then 
+    source /Users/championswimmer/.tnsrc 
+fi
+###-tns-completion-end-###
