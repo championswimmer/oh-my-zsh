@@ -3,6 +3,10 @@ source $HOME/.profile
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+if (( ! ${fpath[(I)/usr/local/share/zsh/site-functions]} )); then
+  FPATH=/usr/local/share/zsh/site-functions:$FPATH
+fi
+
 # Path to your oh-my-zsh installation.
 export ZSH=/Users/championswimmer/.oh-my-zsh
 
@@ -50,12 +54,13 @@ ZSH_THEME="spaceship"
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
 export NVM_AUTO_USE=true
+export NVM_LAZY_LOAD=true
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(heroku zsh-completions docker npm zsh-nvm ember-cli)
+plugins=(git github heroku zsh-completions brew docker npm yarn zsh-nvm ember-cli)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -94,10 +99,6 @@ alias pg_start='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-serv
 alias pg_stop='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper stop';
 alias pg_restart='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper restart';
 alias bash='/usr/local/bin/bash -l'
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # added by travis gem
 [ -f /Users/championswimmer/.travis/travis.sh ] && source /Users/championswimmer/.travis/travis.sh
