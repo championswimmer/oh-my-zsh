@@ -28,8 +28,8 @@ alias mkdir='mkdir -pv'
 alias psmem='ps -e -orss=,args= | sort -b -k1,1n'
 alias psmem10='ps -e -orss=,args= | sort -b -k1,1n| head -10'
 # get top process eating cpu if not work try excute : export LC_ALL='C'
-alias pscpu='ps -e -o pcpu,cpu,nice,state,cputime,args|sort -k1 -nr'
-alias pscpu10='ps -e -o pcpu,cpu,nice,state,cputime,args|sort -k1 -nr | head -10'
+alias pscpu='ps -e -o pcpu,cpu,nice,state,cputime,args|sort -k1,1n -nr'
+alias pscpu10='ps -e -o pcpu,cpu,nice,state,cputime,args|sort -k1,1n -nr | head -10'
 # top10 of the history
 alias hist10='print -l ${(o)history%% *} | uniq -c | sort -nr | head -n 10'
 
@@ -134,12 +134,12 @@ geteip() {
     curl -s -S https://icanhazip.com
 }
 
-# determine local IP address
+# determine local IP address(es)
 getip() {
     if (( ${+commands[ip]} )); then
-        ip addr | grep "inet " | grep -v '127.0.0.1' | awk '{print $2}'
+        ip addr | awk '/inet /{print $2}' | command grep -v 127.0.0.1
     else
-        ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'
+        ifconfig | awk '/inet /{print $2}' | command grep -v 127.0.0.1
     fi
 }
 
