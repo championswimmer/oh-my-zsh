@@ -60,7 +60,20 @@ export NVM_LAZY_LOAD=true
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git github heroku zsh-completions brew docker npm yarn zsh-nvm ember-cli)
+plugins=(
+	dotenv 
+	git 
+	github 
+	heroku 
+	yarn 
+	zsh-completions 
+	brew 
+	docker 
+	zsh-nvm 
+	ember-cli 
+	npm 
+	rbenv
+)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -95,9 +108,9 @@ source $ZSH/oh-my-zsh.sh
 
 autoload -U compinit && compinit
 
-alias pg_start='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper start';
-alias pg_stop='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper stop';
-alias pg_restart='sudo /opt/local/etc/LaunchDaemons/org.macports.postgresql96-server/postgresql96-server.wrapper restart';
+alias pg_start='brew services start postgresql'
+alias pg_stop='brew services stop postgresql'
+alias pg_restart='brew services restart postgresql'
 alias bash='/usr/local/bin/bash -l'
 
 # added by travis gem
@@ -106,8 +119,6 @@ alias bash='/usr/local/bin/bash -l'
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 
 eval "$(rbenv init -)" 
-
-export NVM_AUTO_USE=true
 
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
