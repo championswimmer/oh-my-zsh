@@ -19,10 +19,11 @@ plugins=(... git)
 | gau                  | git add --update                                                                                                                 |
 | gav                  | git add --verbose                                                                                                                |
 | gap                  | git apply                                                                                                                        |
+| gapt                 | git apply --3way                                                                                                                 |
 | gb                   | git branch                                                                                                                       |
 | gba                  | git branch -a                                                                                                                    |
 | gbd                  | git branch -d                                                                                                                    |
-| gbda                 | git branch --no-color --merged \| command grep -vE "^(\+|\*\|\s*(master\|develop\|dev)\s*$)" \| command xargs -n 1 git branch -d |
+| gbda                 | git branch --no-color --merged \| command grep -vE "^(\+\|\*\|\s*(master\|development\|develop\|devel\|dev)\s*$)" \| command xargs -n 1 git branch -d |
 | gbD                  | git branch -D                                                                                                                    |
 | gbl                  | git blame -b -w                                                                                                                  |
 | gbnm                 | git branch --no-merged                                                                                                           |
@@ -61,6 +62,7 @@ plugins=(... git)
 | gdct                 | git describe --tags $(git rev-list --tags --max-count=1)                                                                         |
 | gds                  | git diff --staged                                                                                                                |
 | gdt                  | git diff-tree --no-commit-id --name-only -r                                                                                      |
+| gdnolock             | git diff $@ ":(exclude)package-lock.json" ":(exclude)&ast;.lock"                                                                 |
 | gdv                  | git diff -w $@ \| view -                                                                                                         |
 | gdw                  | git diff --word-diff                                                                                                             |
 | gf                   | git fetch                                                                                                                        |
@@ -100,7 +102,7 @@ plugins=(... git)
 | glola                | git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --all                     |
 | glog                 | git log --oneline --decorate --graph                                                                                             |
 | gloga                | git log --oneline --decorate --graph --all                                                                                       |
-| glp                  | `_git_log_prettily`                                                                                                              |
+| glp                  | git log --pretty=\<format\>                                                                                                       |
 | gm                   | git merge                                                                                                                        |
 | gmom                 | git merge origin/master                                                                                                          |
 | gmt                  | git mergetool --no-prompt                                                                                                        |
@@ -171,8 +173,13 @@ plugins=(... git)
 | glum                 | git pull upstream master                                                                                                         |
 | gwch                 | git whatchanged -p --abbrev-commit --pretty=medium                                                                               |
 | gwip                 | git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"           |
+| gam                  | git am                                                                                                                           |
+| gamc                 | git am --continue                                                                                                                |
+| gams                 | git am --skip                                                                                                                    |
+| gama                 | git am --abort                                                                                                                   |
+| gamscp               | git am --show-current-patch                                                                                                      |
 
-### Deprecated
+### Deprecated aliases
 
 These are aliases that have been removed, renamed, or otherwise modified in a way that may, or may not, receive further support.
 
@@ -211,7 +218,7 @@ These features allow to pause a branch development and switch to another one (_"
 | gwip             | Commit wip branch                               |
 | gunwip           | Uncommit wip branch                             |
 
-### Deprecated
+### Deprecated functions
 
 | Command                | Description                             | Reason                                                          |
 |:-----------------------|:----------------------------------------|:----------------------------------------------------------------|

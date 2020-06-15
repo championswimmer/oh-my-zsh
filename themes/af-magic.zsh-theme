@@ -19,9 +19,14 @@ RPROMPT='$my_gray$(git_prompt_info)%{$reset_color%}%'
 
 # separator dashes size
 function afmagic_dashes {
-	[[ -n "${VIRTUAL_ENV-}" && -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" && "$PS1" = \(* ]] \
-		&& echo $(( COLUMNS - ${#VIRTUAL_ENV} - 3 )) \
-		|| echo $COLUMNS
+	local PYTHON_ENV="$VIRTUAL_ENV"
+	[[ -z "$PYTHON_ENV" ]] && PYTHON_ENV="$CONDA_DEFAULT_ENV"
+
+	if [[ -n "$PYTHON_ENV" && "$PS1" = \(* ]]; then
+		echo $(( COLUMNS - ${#PYTHON_ENV} - 3 ))
+	else
+		echo $COLUMNS
+	fi
 }
 
 
