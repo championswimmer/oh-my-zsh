@@ -8,7 +8,7 @@ if (( ! ${fpath[(I)/usr/local/share/zsh/site-functions]} )); then
 fi
 
 # Path to your oh-my-zsh installation.
-export ZSH="/Users/championswimmer/.oh-my-zsh"
+export ZSH=/Users/championswimmer/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -48,7 +48,7 @@ ZSH_THEME="spaceship"
 # Uncomment the following line if you want to change the command execution time
 # stamp shown in the history command output.
 # The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-HIST_STAMPS="yyyy-mm-dd"
+# HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
@@ -124,8 +124,6 @@ eval "$(rbenv init -)"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/Users/championswimmer/.sdkman"
 [[ -s "/Users/championswimmer/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/championswimmer/.sdkman/bin/sdkman-init.sh"
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
 
 ###-tns-completion-start-###
 if [ -f /Users/championswimmer/.tnsrc ]; then 
