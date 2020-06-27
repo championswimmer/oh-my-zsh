@@ -1,0 +1,6 @@
+[submodule "custom/plugins/zsh-nvm"]
+	path = custom/plugins/zsh-nvm
+	url = https://github.com/lukechilds/zsh-nvm
+[submodule "custom/plugins/zsh-completions"]
+	path = custom/plugins/zsh-completions
+	url = https://github.com/zsh-users/zsh-completions
