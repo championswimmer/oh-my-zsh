@@ -57,9 +57,9 @@
     # goenv                   # go environment (https://github.com/syndbg/goenv)
     # nodenv                  # node.js version from nodenv (https://github.com/nodenv/nodenv)
     package               # name@version from package.json (https://docs.npmjs.com/files/package.json)
-    nvm                     # node.js version from nvm (https://github.com/nvm-sh/nvm)
+    # nvm                     # node.js version from nvm (https://github.com/nvm-sh/nvm)
     # nodeenv                 # node.js environment (https://github.com/ekalinin/nodeenv)
-    # node_version          # node.js version
+    node_version          # node.js version
     # go_version            # go version (https://golang.org)
     # rust_version          # rustc version (https://www.rust-lang.org)
     # dotnet_version        # .NET version (https://dotnet.microsoft.com)
@@ -86,18 +86,18 @@
     # ranger                  # ranger shell (https://github.com/ranger/ranger)
     # nnn                     # nnn shell (https://github.com/jarun/nnn)
     # vim_shell               # vim shell indicator (:sh)
-    midnight_commander      # midnight commander shell (https://midnight-commander.org/)
+    # midnight_commander      # midnight commander shell (https://midnight-commander.org/)
     nix_shell               # nix shell (https://nixos.org/nixos/nix-pills/developing-with-nix-shell.html)
     # vi_mode                 # vi mode (you don't need this if you've enabled prompt_char)
-    # vpn_ip                # virtual private network indicator
     # disk_usage            # disk usage
     # swap                  # used swap
-    todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
+    # todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
     # timewarrior             # timewarrior tracking status (https://timewarrior.net/)
     # taskwarrior             # taskwarrior task count (https://taskwarrior.org/)
     time                    # current time
     # =========================[ Line #2 ]=========================
     newline
+    vpn_ip                # virtual private network indicator
     load                  # CPU load
     ram                   # free RAM
     # ip                    # ip address and bandwidth usage for a specified network interface
@@ -1404,7 +1404,7 @@
 
   ########################[ vpn_ip: virtual private network indicator ]#########################
   # VPN IP color.
-  typeset -g POWERLEVEL9K_VPN_IP_FOREGROUND=81
+  typeset -g POWERLEVEL9K_VPN_IP_FOREGROUND=167
   # When on VPN, show just an icon without the IP address.
   # Tip: To display the private IP address when on VPN, remove the next line.
   typeset -g POWERLEVEL9K_VPN_IP_CONTENT_EXPANSION=
@@ -1416,7 +1416,7 @@
   # Tip: If you set it to true, you'll probably want to unset POWERLEVEL9K_VPN_IP_CONTENT_EXPANSION.
   typeset -g POWERLEVEL9K_VPN_IP_SHOW_ALL=false
   # Custom icon.
-  # typeset -g POWERLEVEL9K_VPN_IP_VISUAL_IDENTIFIER_EXPANSION='⭐'
+  typeset -g POWERLEVEL9K_VPN_IP_VISUAL_IDENTIFIER_EXPANSION=''
 
   ###########[ ip: ip address and bandwidth usage for a specified network interface ]###########
   # IP color.
