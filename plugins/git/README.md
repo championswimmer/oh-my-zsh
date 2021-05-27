@@ -41,6 +41,8 @@ plugins=(... git)
 | gcan!                | git commit -v -a --no-edit --amend                                                                                               |
 | gcans!               | git commit -v -a -s --no-edit --amend                                                                                            |
 | gcam                 | git commit -a -m                                                                                                                 |
+| gcas                 | git commit -a -s                                                                                                                 |
+| gcasm                | git commit -a -s -m                                                                                                                  |
 | gcsm                 | git commit -s -m                                                                                                                 |
 | gcb                  | git checkout -b                                                                                                                  |
 | gcf                  | git config --list                                                                                                                |
@@ -124,6 +126,7 @@ plugins=(... git)
 | grbd                 | git rebase develop                                                                                                               |
 | grbi                 | git rebase -i                                                                                                                    |
 | grbm                 | git rebase $(git_main_branch)                                                                                                                  |
+| grbo                 | git rebase --onto                                                                                                             |
 | grbs                 | git rebase --skip                                                                                                                |
 | grev                 | git revert                                                                                                                       |
 | grh                  | git reset                                                                                                                        |
