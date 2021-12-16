@@ -121,9 +121,6 @@ alias pg_stop='brew services stop postgresql'
 alias pg_restart='brew services restart postgresql'
 alias bash='/usr/local/bin/bash -l'
 
-# added by travis gem
-[ -f /Users/championswimmer/.travis/travis.sh ] && source /Users/championswimmer/.travis/travis.sh
-
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 
 eval "$(rbenv init -)" 
@@ -133,11 +130,6 @@ eval "$(rbenv init -)"
 export SDKMAN_DIR="/Users/championswimmer/.sdkman"
 [[ -s "/Users/championswimmer/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/championswimmer/.sdkman/bin/sdkman-init.sh"
 
-###-tns-completion-start-###
-if [ -f /Users/championswimmer/.tnsrc ]; then 
-    source /Users/championswimmer/.tnsrc 
-fi
-###-tns-completion-end-###
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
