@@ -5,8 +5,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-alias ls='ls --color -p'
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -119,12 +117,14 @@ autoload -U compinit && compinit
 alias pg_start='brew services start postgresql'
 alias pg_stop='brew services stop postgresql'
 alias pg_restart='brew services restart postgresql'
-alias bash='/usr/local/bin/bash -l'
+alias bash='/opt/homebrew/bin/bash -l'
 
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
+alias ls='ls --color -p'
 
 eval "$(rbenv init -)" 
 
+unalias git
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="/Users/championswimmer/.sdkman"
@@ -133,3 +133,5 @@ export SDKMAN_DIR="/Users/championswimmer/.sdkman"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
