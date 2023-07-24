@@ -27,6 +27,16 @@ function work_in_progress() {
   command git -c log.showSignature=false log -n 1 2>/dev/null | grep -q -- "--wip--" && echo "WIP!!"
 }
 
+# Similar to `gunwip` but recursive "Unwips" all recent `--wip--` commits not just the last one
+function gunwipall() {
+  local _commit=$(git log --grep='--wip--' --invert-grep --max-count=1 --format=format:%H)
+  
+  # Check if a commit without "--wip--" was found and it's not the same as HEAD
+  if [[ "$_commit" != "$(git rev-parse HEAD)" ]]; then
+    git reset $_commit || return 1
+  fi
+}
+
 # Check if main exists and use instead of master
 function git_main_branch() {
   command git rev-parse --git-dir &>/dev/null || return
@@ -74,8 +84,8 @@ alias gbd='git branch --delete'
 alias gbda='git branch --no-color --merged | command grep -vE "^([+*]|\s*($(git_main_branch)|$(git_develop_branch))\s*$)" | command xargs git branch --delete 2>/dev/null'
 alias gbD='git branch --delete --force'
 alias gbg='git branch -vv | grep ": gone\]"'
-alias gbgd='local res=$(gbg | awk '"'"'{print $1}'"'"') && [[ $res ]] && echo $res | xargs git branch -d'
-alias gbgD='local res=$(gbg | awk '"'"'{print $1}'"'"') && [[ $res ]] && echo $res | xargs git branch -D'
+alias gbgd='git branch --no-color -vv | grep ": gone\]" | awk '"'"'{print $1}'"'"' | xargs git branch -d'
+alias gbgD='git branch --no-color -vv | grep ": gone\]" | awk '"'"'{print $1}'"'"' | xargs git branch -D'
 alias gbl='git blame -b -w'
 alias gbnm='git branch --no-merged'
 alias gbr='git branch --remote'
@@ -237,6 +247,7 @@ alias gmtl='git mergetool --no-prompt'
 alias gmtlvim='git mergetool --no-prompt --tool=vimdiff'
 alias gmum='git merge upstream/$(git_main_branch)'
 alias gma='git merge --abort'
+alias gms="git merge --squash"
 
 alias gp='git push'
 alias gpd='git push --dry-run'
@@ -311,7 +322,7 @@ alias gtv='git tag | sort -V'
 alias gtl='gtl(){ git tag --sort=-v:refname -n --list "${1}*" }; noglob gtl'
 
 alias gunignore='git update-index --no-assume-unchanged'
-alias gunwip='git log --max-count=1 | grep -q -c "\--wip--" && git reset HEAD~1'
+alias gunwip='git rev-list --max-count=1 --format="%s" HEAD | grep -q "\--wip--" && git reset HEAD~1'
 alias gup='git pull --rebase'
 alias gupv='git pull --rebase --verbose'
 alias gupa='git pull --rebase --autostash'

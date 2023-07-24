@@ -95,7 +95,8 @@ function update_last_updated_file() {
 }
 
 function update_ohmyzsh() {
-  if ZSH="$ZSH" zsh -f "$ZSH/tools/upgrade.sh" --interactive; then
+  zstyle -s ':omz:update' verbose verbose_mode || verbose_mode=default
+  if ZSH="$ZSH" zsh -f "$ZSH/tools/upgrade.sh" -i -v $verbose_mode; then
     update_last_updated_file
   fi
 }
@@ -179,6 +180,7 @@ function has_typed_input() {
 
   # Check if there are updates available before proceeding
   if ! is_update_available; then
+    update_last_updated_file
     return
   fi
 
