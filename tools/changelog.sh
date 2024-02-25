@@ -292,16 +292,17 @@ function display-release {
   function fmt:hash {
     #* Uses $hash from outer scope
     local hash="${1:-$hash}"
+    local short_hash="${hash:0:7}" # 7 characters sha, top level sha is 12 characters
     case "$output" in
-    raw) printf '%s' "$hash" ;;
+    raw) printf '%s' "$short_hash" ;;
     text)
-      local text="\e[33m$hash\e[0m"; # red
+      local text="\e[33m$short_hash\e[0m"; # red
       if supports_hyperlinks; then
         printf "\e]8;;%s\a%s\e]8;;\a" "https://github.com/ohmyzsh/ohmyzsh/commit/$hash" $text;
       else
         echo $text;
       fi ;;
-    md) printf '[`%s`](https://github.com/ohmyzsh/ohmyzsh/commit/%s)' "$hash" "$hash" ;;
+    md) printf '[`%s`](https://github.com/ohmyzsh/ohmyzsh/commit/%s)' "$short_hash" "$hash" ;;
     esac
   }
 
@@ -366,7 +367,7 @@ function display-release {
     # In text mode, highlight (#<issue>) and dim text between `backticks`
     text)
       if supports_hyperlinks; then
-        sed -E $'s|#([0-9]+)|\e]8;;https://github.com/ohmyzsh/ohmyzsh/issues/\\1\a\e[32m#\\1\e[0m\e]8;;\a|g' <<< "$subject"
+        sed -E $'s|#([0-9]+)|\e]8;;https://github.com/ohmyzsh/ohmyzsh/issues/\\1\a\e[32m#\\1\e[0m\e]8;;\a|g;s|`([^`]+)`|`\e[2m\\1\e[0m`|g' <<< "$subject"
       else
         sed -E $'s|#([0-9]+)|\e[32m#\\1\e[0m|g;s|`([^`]+)`|`\e[2m\\1\e[0m`|g' <<< "$subject"
       fi ;;
@@ -512,13 +513,13 @@ function main {
   # Git log options
   # -z:             commits are delimited by null bytes
   # --format:       [7-char hash]<field sep>[ref names]<field sep>[subject]<field sep>[body]
-  # --abbrev=7:     force commit hashes to be 7 characters long
+  # --abbrev=7:     force commit hashes to be 12 characters long
   # --no-merges:    merge commits are omitted
   # --first-parent: commits from merged branches are omitted
   local SEP="0mZmAgIcSeP"
   local -a raw_commits
   raw_commits=(${(0)"$(command git -c log.showSignature=false log -z \
-    --format="%h${SEP}%D${SEP}%s${SEP}%b" --abbrev=7 \
+    --format="%h${SEP}%D${SEP}%s${SEP}%b" --abbrev=12 \
     --no-merges --first-parent $range)"})
 
   local raw_commit
