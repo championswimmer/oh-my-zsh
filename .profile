@@ -4,6 +4,8 @@ export CXX=clang++
 
 export PATH="$HOME/bin:${PATH}"
 
+export HOMEBREW_NO_AUTO_UPDATE=1
+
 export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 export CPPFLAGS="-I/opt/homebrew/include $CPPFLAGS"
 export LDFLAGS="-L/opt/homebrew/lib $LDFLAGS"
@@ -70,7 +72,8 @@ export EDITOR="/opt/homebrew/bin/mate -w"
 export GITHUB_TOKEN="xxx"
 export TARGET_GITHUB_TOKEN="xxx"
 export SLICE_GITHUB_TOKEN="xxx"
-export TWITTER_BEARER_TOKEN="xxx%xxx%xxx"
+export V18_GITHUB_TOKEN="xxx"
+export TWITTER_BEARER_TOKEN="xxx"
 export VSCODE_MARKETPLACE_TOKEN="xxx"
 export BITBUCKET_KEY="xxx"
 export BITBUCKET_SECRET="xxx"
@@ -84,15 +87,20 @@ export GRADLE_HOME="$HOME/.sdkman/candidates/gradle/current"
 export GRADLE_USER_HOME="$HOME/.gradle"
 
 export GOPATH="$HOME/.go"
+export PATH="$GOPATH/bin:${PATH}"
 
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
+
+alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
 
 alias hub_cli=$(which hub)
 function hub() {
   if [[ $(pwd) =~ "$HOME/Development/Slice.*" ]]; then
     	GHT=$SLICE_GITHUB_TOKEN
-  	else
+	elif [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
+    	GHT=$V18_GITHUB_TOKEN
+	else
 	  	GHT=$GITHUB_TOKEN
   	fi
 
@@ -109,6 +117,8 @@ function gh() {
 
   GITHUB_TOKEN=$GHT gh_cli $@
 }
+
+ssh-add -q --apple-use-keychain $HOME/.ssh/id_rsa
 
 
 # [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm

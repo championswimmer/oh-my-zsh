@@ -786,7 +786,7 @@
   # Load color when load is over 70%.
   typeset -g POWERLEVEL9K_LOAD_CRITICAL_BACKGROUND=167
   # Custom icon.
-  typeset -g POWERLEVEL9K_LOAD_VISUAL_IDENTIFIER_EXPANSION=''
+  typeset -g POWERLEVEL9K_LOAD_VISUAL_IDENTIFIER_EXPANSION=$''
 
   ################[ todo: todo items (https://github.com/todotxt/todo.txt-cli) ]################
   # Todo color.
@@ -987,7 +987,7 @@
   # Show node version only when in a directory tree containing package.json.
   typeset -g POWERLEVEL9K_NODE_VERSION_PROJECT_ONLY=true
   # Custom icon.
-  # typeset -g POWERLEVEL9K_NODE_VERSION_VISUAL_IDENTIFIER_EXPANSION='⭐'
+  # typeset -g POWERLEVEL9K_NODE_VERSION_VISUAL_IDENTIFIER_EXPANSION='󰎙'
 
   #######################[ go_version: go version (https://golang.org) ]########################
   # Go version color.
@@ -1039,7 +1039,7 @@
 
   ###[ package: name@version from package.json (https://docs.npmjs.com/files/package.json) ]####
   # Package color.
-  typeset -g POWERLEVEL9K_PACKAGE_FOREGROUND=117
+  typeset -g POWERLEVEL9K_PACKAGE_FOREGROUND=104
   # Package format. The following parameters are available within the expansion.
   #
   # - P9K_PACKAGE_NAME     The value of `name` field in package.json.
@@ -1465,15 +1465,15 @@
   # Show battery in yellow when it's discharging.
   typeset -g POWERLEVEL9K_BATTERY_DISCONNECTED_BACKGROUND=178
   # Battery pictograms going from low to high level of charge.
-  typeset -g POWERLEVEL9K_BATTERY_STAGES='\uf58d\uf579\uf57a\uf57b\uf57c\uf57d\uf57e\uf57f\uf580\uf581\uf578'
+  typeset -g POWERLEVEL9K_BATTERY_STAGES='󰂎󰁺󰁻󰁽󰁾󰁿󰂀󰂁󰂂󰁹'
   # Pictogram to show when the battery is fully charged and connected to power supply.
-  typeset -g POWERLEVEL9K_BATTERY_CHARGING_VISUAL_IDENTIFIER_EXPANSION=$'\uf583'
+  typeset -g POWERLEVEL9K_BATTERY_CHARGING_VISUAL_IDENTIFIER_EXPANSION=$'󰂄'
   # Don't show the remaining time to charge/discharge.
   typeset -g POWERLEVEL9K_BATTERY_VERBOSE=false
 
   #####################################[ wifi: wifi speed ]#####################################
   # WiFi color.
-  typeset -g POWERLEVEL9K_WIFI_FOREGROUND=
+  typeset -g POWERLEVEL9K_WIFI_FOREGROUND=255
   typeset -g POWERLEVEL9K_WIFI_BACKGROUND=68
   # Custom icon.
   typeset -g POWERLEVEL9K_WIFI_VISUAL_IDENTIFIER_EXPANSION=$'\uf1eb'
