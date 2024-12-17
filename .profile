@@ -10,7 +10,7 @@ export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 export CPPFLAGS="-I/opt/homebrew/include $CPPFLAGS"
 export LDFLAGS="-L/opt/homebrew/lib $LDFLAGS"
 
-#curl 
+#curl
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 
 # Ruby
@@ -66,17 +66,20 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 #export EDITOR=nano
-export EDITOR="/opt/homebrew/bin/mate -w"
+export EDITOR="/usr/local/bin/mate -w"
 
 
 export GITHUB_TOKEN="xxx"
-export TARGET_GITHUB_TOKEN="xxx"
-export SLICE_GITHUB_TOKEN="xxx"
 export V18_GITHUB_TOKEN="xxx"
 export TWITTER_BEARER_TOKEN="xxx"
 export VSCODE_MARKETPLACE_TOKEN="xxx"
 export BITBUCKET_KEY="xxx"
 export BITBUCKET_SECRET="xxx"
+export ANTHROPIC_API_KEY="xxx"
+export GOOGLE_AI_API_KEY="xxx"
+export GROQ_API_KEY="xxx"
+export OPENAI_API_KEY="xxx"
+export XAI_API_KEY="xxx"
 
 export CHROME_EXECUTABLE="/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"
 # export CHROME_EXECUTABLE="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
@@ -91,34 +94,35 @@ export PATH="$GOPATH/bin:${PATH}"
 
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
-
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
 
 alias hub_cli=$(which hub)
 function hub() {
-  if [[ $(pwd) =~ "$HOME/Development/Slice.*" ]]; then
-    	GHT=$SLICE_GITHUB_TOKEN
-	elif [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
+  if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
+	  	GHU="Arnav-Gupta_viacom18"
     	GHT=$V18_GITHUB_TOKEN
-	else
+  	else
+		GHU="championswimmer"
 	  	GHT=$GITHUB_TOKEN
   	fi
 
-  GITHUB_TOKEN=$GHT hub_cli $@
+  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT hub_cli $@
 }
 
 alias gh_cli=$(which gh)
 function gh() {
-  if [[ $(pwd) =~ "$HOME/Development/Slice.*" ]]; then
-    	GHT=$SLICE_GITHUB_TOKEN
+  if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
+	  	GHU="Arnav-Gupta_viacom18"
+	  	GHT=$V18_GITHUB_TOKEN
   	else
+		GHU="championswimmer"
 	  	GHT=$GITHUB_TOKEN
   	fi
 
-  GITHUB_TOKEN=$GHT gh_cli $@
+  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT gh_cli $@
 }
 
-ssh-add -q --apple-use-keychain $HOME/.ssh/id_rsa
+ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519
 
 
 # [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
