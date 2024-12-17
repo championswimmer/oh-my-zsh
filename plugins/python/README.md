@@ -13,7 +13,6 @@ plugins=(... python)
 | Command          | Description                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------- |
 | `py`             | Runs `python3`. Only set if `py` is not installed.                                     |
-| `ipython`        | Runs the appropriate `ipython` version according to the activated virtualenv           |
 | `pyfind`         | Finds .py files recursively in the current directory                                   |
 | `pyclean [dirs]` | Deletes byte-code and cache files from a list of directories or the current one        |
 | `pygrep <text>`  | Looks for `text` in `*.py` files in the current directory, recursively                 |
@@ -32,8 +31,9 @@ virtual environments:
   `venv`) in the current directory.
 
 - `auto_vrun`: Automatically activate the venv virtual environment when entering a directory containing
-  `<venv-name>/bin/activate`, and automatically deactivate it when navigating out of it (including
-  subdirectories!).
+  `<venv-name>/bin/activate`, and automatically deactivate it when navigating out of it (keeps venv activated
+  in subdirectories).
   - To enable the feature, set `export PYTHON_AUTO_VRUN=true` before sourcing oh-my-zsh.
-  - The default virtual environment name is `venv`. To use a different name, set
+  - Plugin activates first virtual environment in lexicographic order whose name begins with `<venv-name>`.
+    The default virtual environment name is `venv`. To use a different name, set
     `export PYTHON_VENV_NAME=<venv-name>`. For example: `export PYTHON_VENV_NAME=".venv"`

@@ -76,18 +76,18 @@ EOF
       (*.lz4) lz4 -d "$full_path" ;;
       (*.lzma) unlzma "$full_path" ;;
       (*.z) uncompress "$full_path" ;;
-      (*.zip|*.war|*.jar|*.ear|*.sublime-package|*.ipa|*.ipsw|*.xpi|*.apk|*.aar|*.whl) unzip "$full_path" ;;
+      (*.zip|*.war|*.jar|*.ear|*.sublime-package|*.ipa|*.ipsw|*.xpi|*.apk|*.aar|*.whl|*.vsix|*.crx) unzip "$full_path" ;;
       (*.rar) unrar x -ad "$full_path" ;;
       (*.rpm)
         rpm2cpio "$full_path" | cpio --quiet -id ;;
-      (*.7z) 7za x "$full_path" ;;
+      (*.7z | *.7z.[0-9]*) 7za x "$full_path" ;;
       (*.deb)
         command mkdir -p "control" "data"
         ar vx "$full_path" > /dev/null
         builtin cd -q control; extract ../control.tar.*
         builtin cd -q ../data; extract ../data.tar.*
         builtin cd -q ..; command rm *.tar.* debian-binary ;;
-      (*.zst) unzstd "$full_path" ;;
+      (*.zst) unzstd --stdout "$full_path" > "${file:t:r}" ;;
       (*.cab|*.exe) cabextract "$full_path" ;;
       (*.cpio|*.obscpio) cpio -idmvF "$full_path" ;;
       (*.zpaq) zpaq x "$full_path" ;;

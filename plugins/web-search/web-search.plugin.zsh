@@ -31,6 +31,8 @@ function web_search() {
     npmpkg          "https://www.npmjs.com/search?q="
     packagist       "https://packagist.org/?query="
     gopkg           "https://pkg.go.dev/search?m=package&q="
+    chatgpt         "https://chatgpt.com/?q="
+    reddit          "https://www.reddit.com/search/?q="
   )
 
   # check whether the search engine is supported
@@ -48,7 +50,7 @@ function web_search() {
 
     # build search url:
     # join arguments passed with '+', then append to search engine URL
-    url="${urls[$1]}$(omz_urlencode $param ${@[2,-1]})"
+    url="${urls[$1]}$(omz_urlencode $param ${(s: :)@[2,-1]})"
   else
     # build main page url:
     # split by '/', then rejoin protocol (1) and domain (2) parts with '//'
@@ -83,6 +85,8 @@ alias dockerhub='web_search dockerhub'
 alias npmpkg='web_search npmpkg'
 alias packagist='web_search packagist'
 alias gopkg='web_search gopkg'
+alias chatgpt='web_search chatgpt'
+alias reddit='web_search reddit'
 
 #add your own !bang searches here
 alias wiki='web_search duckduckgo \!w'
