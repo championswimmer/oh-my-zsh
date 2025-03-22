@@ -15,6 +15,12 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH=/Users/championswimmer/.oh-my-zsh
 
+# Autocomplete 
+source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+bindkey              '^I' menu-select
+bindkey "$terminfo[kcbt]" menu-select 
+
+
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
@@ -62,13 +68,20 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 export NVM_AUTO_USE=true
 export NVM_LAZY_LOAD=true
 
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20 
+ZSH_AUTOSUGGEST_STRATEGY=(
+	match_prev_cmd
+	completion
+)
+
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	dotenv 
-	git 
+	zsh-autosuggestions
+#	git 
 	github 
 	heroku 
 	yarn 
@@ -77,8 +90,11 @@ plugins=(
 	docker 
 	zsh-nvm 
 	ember-cli 
-	npm 
+#	npm 
+	zsh-npm-scripts-autocomplete
 	rbenv
+	bun
+	yarn
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -112,7 +128,7 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-autoload -U compinit && compinit
+# autoload -U compinit && compinit
 
 alias pg_start='brew services start postgresql'
 alias pg_stop='brew services stop postgresql'
@@ -135,3 +151,9 @@ export SDKMAN_DIR="/Users/championswimmer/.sdkman"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+# bun completions
+[ -s "/Users/championswimmer/.oh-my-zsh/completions/_bun" ] && source "/Users/championswimmer/.oh-my-zsh/completions/_bun"
+
+# Added by Windsurf
+export PATH="/Users/championswimmer/.codeium/windsurf/bin:$PATH"
