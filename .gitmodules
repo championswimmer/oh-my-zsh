@@ -13,3 +13,6 @@
 [submodule "custom/plugins/zsh-autosuggestions"]
 	path = custom/plugins/zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule "custom/plugins/zsh-github-copilot"]
+	path = custom/plugins/zsh-github-copilot
+	url = https://github.com/loiccoyle/zsh-github-copilot
