@@ -1,31 +1,32 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-export CXX=clang++
 
 export PATH="$HOME/bin:${PATH}"
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
+# export C="/opt/homebrew/opt/llvm/bin/clang" CXX="/opt/homebrew/opt/llvm/bin/clang++"
+export C="/usr/bin/clang" CXX="/usr/bin/clang++"
+export CMAKE_C_COMPILER="$C" CMAKE_CXX_COMPILER="$CXX"
+
+export CMAKE_POLICY_VERSION_MINIMUM=3.10
+
 export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
-export CPPFLAGS="-I/opt/homebrew/include $CPPFLAGS"
-export LDFLAGS="-L/opt/homebrew/lib $LDFLAGS"
 
 #curl
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 
-# Ruby
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH="/usr/local/lib/ruby/gems/2.7.0/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/ruby/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/ruby/include $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/ruby/lib/pkgconfig:$PKG_CONFIG_PATH"
-
 # coreutils
-export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+export PATH="$PATH:/opt/homebrew/opt/coreutils/libexec/gnubin"
+
+# glib
+export PATH="/opt/homebrew/opt/glib/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/glib/lib $LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/opt/glib/include $CPPFLAGS"
 
 
 # binutils
-export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
+export PATH="$PATH:/opt/homebrew/opt/binutils/bin"
 export LDFLAGS="-L/opt/homebrew/opt/binutils/lib $LDFLAGS"
 export CPPFLAGS="-I/opt/homebrew/opt/binutils/include $CPPFLAGS"
 
@@ -33,8 +34,24 @@ export LDFLAGS="-L/opt/homebrew/opt/readline/lib $LDFLAGS"
 export CPPFLAGS="-I/opt/homebrew/opt/readline/include $CPPFLAGS"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
 
+# zlib 
+export LDFLAGS="-L/opt/homebrew/opt/zlib/lib $LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/opt/zlib/include $CPPFLAGS"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+# FFI
 export LDFLAGS="-L/opt/homebrew/opt/libffi/lib $LDFLAGS"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+# LLVM 
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/llvm/lib ${LDFLAGS}"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm/include ${CPPFLAGS}"
+
+# JPEG Turbo 
+export LDFLAGS="-L/opt/homebrew/opt/libjpeg-turbo/lib ${LDFLAGS}"
+export CPPFLAGS="-I/opt/homebrew/opt/libjpeg-turbo/include ${CPPFLAGS}"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/libjpeg-turbo/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 # SQlite
 export LDFLAGS="-L/opt/homebrew/opt/sqlite/lib  $LDFLAGS"
@@ -53,8 +70,8 @@ export PATH="/opt/homebrew/opt/python@3/libexec/bin/:$PATH"
 # Android
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$ANDROID_HOME/platform-tools:$PATH"
-export PATH="$ANDROID_HOME/tools:$PATH"
-export PATH="$ANDROID_HOME/tools/bin:$PATH"
+export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+export PATH="$ANDROID_HOME/build-tools/latest:$PATH"
 export PATH="$ANDROID_HOME/emulator:$PATH"
 
 # export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
@@ -86,17 +103,24 @@ export CHROME_EXECUTABLE="/Applications/Google Chrome Canary.app/Contents/MacOS/
 
 export NVM_DIR="$HOME/.nvm"
 
+# Gradle
 export GRADLE_HOME="$HOME/.sdkman/candidates/gradle/current"
 export GRADLE_USER_HOME="$HOME/.gradle"
 
+# Go
 export GOPATH="$HOME/.go"
 export PATH="$GOPATH/bin:${PATH}"
 
-export PATH="$PATH":"$HOME/.pub-cache/bin"
+# Rust
+export PATH="$HOME/.cargo/bin:${PATH}"
+export VCPKG_ROOT="$HOME/bin/vcpkg" 
+
+export PATH="${PATH}:$HOME/.pub-cache/bin"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
+alias hs="npx live-server"
 
-alias hub_cli=$(which hub)
+alias hub_cli="/opt/homebrew/bin/hub"
 function hub() {
   if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
 	  	GHU="Arnav-Gupta_viacom18"

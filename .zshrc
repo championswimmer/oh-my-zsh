@@ -20,6 +20,10 @@ source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.
 bindkey              '^I' menu-select
 bindkey "$terminfo[kcbt]" menu-select 
 
+# Github Copilot Bindings 
+bindkey '^_' zsh_gh_copilot_explain  # bind Option+? to explain
+bindkey '^@' zsh_gh_copilot_suggest  # bind Option+Space to suggest
+
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -157,3 +161,8 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 # Added by Windsurf
 export PATH="/Users/championswimmer/.codeium/windsurf/bin:$PATH"
+
+export PATH="/Users/championswimmer/.local/bin:$PATH"
+
+# opencode
+export PATH=/Users/championswimmer/.opencode/bin:$PATH
