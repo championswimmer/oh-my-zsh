@@ -1,0 +1,75 @@
+# Custom _parameters function to mask sensitive environment variables
+_parameters() {
+    local expl
+    local -a params masked_params
+    local param value pattern_match
+    
+    # List of sensitive patterns (case-insensitive)
+    local -a sensitive_patterns
+    sensitive_patterns=(
+        "API" "TOKEN" "PASSWORD" "SECRET" "KEY" "PASS" "PWD" 
+        "CREDENTIAL" "AUTH" "OAUTH" "BEARER" "PRIVATE" "SECURE"
+        "CERT" "CERTIFICATE" "HASH" "SALT" "SIGNATURE" "ACCESS"
+        "SESSION" "JWT" "REFRESH" "CLIENT_SECRET" "WEBHOOK"
+        "ENCRYPTION" "DECRYPT" "MASTER" "ROOT" "ADMIN" "SUDO"
+        "DATABASE_URL" "DB_PASSWORD" "POSTGRES_PASSWORD" 
+        "MYSQL_PASSWORD" "REDIS_PASSWORD" "MONGODB_PASSWORD"
+        "GITHUB_TOKEN" "GITLAB_TOKEN" "DOCKER_PASSWORD"
+        "SSH_KEY" "GPG_KEY" "TLS_KEY" "SSL_KEY"
+    )
+    
+    # Get all parameter names
+    params=(${(k)parameters})
+    
+    # Process each parameter
+    for param in $params; do
+        pattern_match=0
+        
+        # Check if parameter name matches any sensitive pattern (case-insensitive)
+        for pattern in $sensitive_patterns; do
+            if [[ ${param:u} == *${pattern:u}* ]]; then
+                pattern_match=1
+                break
+            fi
+        done
+        
+        if (( pattern_match )); then
+            # Mask sensitive variables
+            masked_params+=("$param")
+        else
+            # Include non-sensitive variables normally
+            masked_params+=("$param")
+        fi
+    done
+    
+    # Use _wanted to provide completions with masking in descriptions
+    if (( $+opt_args[-value] )); then
+        # For parameter values, show masked values
+        local -a value_completions
+        for param in $masked_params; do
+            pattern_match=0
+            for pattern in $sensitive_patterns; do
+                if [[ ${param:u} == *${pattern:u}* ]]; then
+                    pattern_match=1
+                    break
+                fi
+            done
+            
+            if (( pattern_match )); then
+                value_completions+=("$param:***")
+            else
+                value="${(P)param}"
+                # Truncate long values
+                if [[ ${#value} -gt 50 ]]; then
+                    value="${value[1,47]}..."
+                fi
+                value_completions+=("$param:$value")
+            fi
+        done
+        
+        _wanted parameters expl 'parameter' _describe -t parameters 'parameters' value_completions
+    else
+        # For parameter names only
+        _wanted parameters expl 'parameter' compadd -a masked_params
+    fi
+}
