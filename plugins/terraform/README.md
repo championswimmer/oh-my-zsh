@@ -16,13 +16,15 @@ plugins=(... terraform)
 ## Aliases
 
 | Alias   | Command                                |
-| ------- | -------------------------------------- |
+|---------|----------------------------------------|
 | `tf`    | `terraform`                            |
 | `tfa`   | `terraform apply`                      |
-| `tfaa`  | `terraform apply -auto-approve`        |
+| `tfa!`  | `terraform apply -auto-approve`        |
+| `tfap`  | `terraform apply -parallelism=1`       |
 | `tfc`   | `terraform console`                    |
 | `tfd`   | `terraform destroy`                    |
 | `tfd!`  | `terraform destroy -auto-approve`      |
+| `tfdp`  | `terraform destroy -parallelism=1`     |
 | `tff`   | `terraform fmt`                        |
 | `tffr`  | `terraform fmt -recursive`             |
 | `tfi`   | `terraform init`                       |
