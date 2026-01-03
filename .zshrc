@@ -15,15 +15,18 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH=/Users/championswimmer/.oh-my-zsh
 
-# Autocomplete 
+# autoload -U compinit && compinit
+
+# Autocomplete
 source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 bindkey              '^I' menu-select
-bindkey "$terminfo[kcbt]" menu-select 
+bindkey "$terminfo[kcbt]" menu-select
 
-# Github Copilot Bindings 
-bindkey '^_' zsh_gh_copilot_explain  # bind Option+? to explain
-bindkey '^@' zsh_gh_copilot_suggest  # bind Option+Space to suggest
-
+# Github Copilot Bindings
+export ZSH_COPILOT_AI_PROVIDER="openai"
+export ZSH_COPILOT_KEY="^@"
+# bindkey '^_' zsh_gh_copilot_explain  # bind Option+? to explain
+# bindkey '^@' zsh_gh_copilot_suggest  # bind Option+Space to suggest
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -72,7 +75,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 export NVM_AUTO_USE=true
 export NVM_LAZY_LOAD=true
 
-ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20 
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 ZSH_AUTOSUGGEST_STRATEGY=(
 	match_prev_cmd
 	completion
@@ -83,22 +86,25 @@ ZSH_AUTOSUGGEST_STRATEGY=(
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-	dotenv 
+	dotenv
+	direnv
 	zsh-autosuggestions
-#	git 
-	github 
-	heroku 
-	yarn 
-	zsh-completions 
-	brew 
-	docker 
-	zsh-nvm 
-	ember-cli 
-#	npm 
+	zsh-autocomplete
+#	git
+	github
+	heroku
+	yarn
+	zsh-completions
+	brew
+	docker
+	zsh-nvm
+	ember-cli
+#	npm
 	zsh-npm-scripts-autocomplete
 	rbenv
 	bun
 	yarn
+	zsh-copilot
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -132,8 +138,6 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# autoload -U compinit && compinit
-
 alias pg_start='brew services start postgresql'
 alias pg_stop='brew services stop postgresql'
 alias pg_restart='brew services restart postgresql'
@@ -142,7 +146,7 @@ alias bash='/opt/homebrew/bin/bash -l'
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 alias ls='ls --color -p'
 
-eval "$(rbenv init -)" 
+eval "$(rbenv init -)"
 
 unalias git
 
@@ -166,3 +170,6 @@ export PATH="/Users/championswimmer/.local/bin:$PATH"
 
 # opencode
 export PATH=/Users/championswimmer/.opencode/bin:$PATH
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"

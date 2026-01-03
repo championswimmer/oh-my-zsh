@@ -473,7 +473,7 @@
   # using them. If you do, your prompt may become slow even when your current directory
   # isn't in an svn or hg reposotiry.
   typeset -g POWERLEVEL9K_VCS_BACKENDS=(git)
-  
+
   typeset -g POWERLEVEL9K_VCS_BACKGROUND=234
 
   # These settings are used for repositories other than Git or when gitstatusd fails and
@@ -827,7 +827,7 @@
   ##############[ taskwarrior: taskwarrior task count (https://taskwarrior.org/) ]##############
   # Taskwarrior color.
   typeset -g POWERLEVEL9K_TASKWARRIOR_FOREGROUND=74
-  
+
   # Taskwarrior segment format. The following parameters are available within the expansion.
   #
   # - P9K_TASKWARRIOR_PENDING_COUNT   The number of pending tasks: `task +PENDING count`.
@@ -1465,9 +1465,9 @@
   # Show battery in yellow when it's discharging.
   typeset -g POWERLEVEL9K_BATTERY_DISCONNECTED_BACKGROUND=178
   # Battery pictograms going from low to high level of charge.
-  typeset -g POWERLEVEL9K_BATTERY_STAGES='󰂎󰁺󰁻󰁽󰁾󰁿󰂀󰂁󰂂󰁹'
+  typeset -g POWERLEVEL9K_BATTERY_STAGES=''
   # Pictogram to show when the battery is fully charged and connected to power supply.
-  typeset -g POWERLEVEL9K_BATTERY_CHARGING_VISUAL_IDENTIFIER_EXPANSION=$'󰂄'
+  typeset -g POWERLEVEL9K_BATTERY_CHARGING_VISUAL_IDENTIFIER_EXPANSION=$''
   # Don't show the remaining time to charge/discharge.
   typeset -g POWERLEVEL9K_BATTERY_VERBOSE=false
 
@@ -1582,6 +1582,12 @@
 
 # Tell `p10k configure` which file it should overwrite.
 typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
+
+# JetBrains terminal: disable right prompt (avoids cursor desync)
+if [[ "$TERMINAL_EMULATOR" == "JetBrains-JediTerm" ]]; then
+  # typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(direnv time status newline java_version)
+  # typeset -g POWERLEVEL10K_RIGHT_PROMPT_ELEMENTS=(direnv time status newline java_version)
+fi
 
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
 'builtin' 'unset' 'p10k_config_opts'
