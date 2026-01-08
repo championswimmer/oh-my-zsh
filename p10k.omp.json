@@ -105,7 +105,7 @@
           "type": "bun",
           "style": "diamond",
           "leading_diamond": "",
-          "background": "#CCBEA7",
+          "background": "#40202a",
           "foreground": "#FEBBD0",
           "template": "  {{ .Full }} "
         },
