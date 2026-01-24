@@ -19,3 +19,6 @@
 [submodule "custom/plugins/zsh-copilot"]
 	path = custom/plugins/zsh-copilot
 	url = https://github.com/Myzel394/zsh-copilot.git
+[submodule "custom/plugins/zsh-llm-assist"]
+	path = custom/plugins/zsh-llm-assist
+	url = https://github.com/championswimmer/zsh-llm-assist
