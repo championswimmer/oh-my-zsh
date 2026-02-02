@@ -64,3 +64,9 @@ alias hs="npx live-server"
 alias env_priv="env | cut -d= -f1"
 
 . "$HOME/.cargo/env"
+
+# ---- SSH agent: one per login session ----
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval "$(ssh-agent -s)" >/dev/null
+    ssh-add ~/.ssh/id_ed25519
+fi
