@@ -1,4 +1,36 @@
-export PATH="$HOME/bin:${PATH}"
+# ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# Locale (fixes UTF-8 warnings)
+export LANG=en_GB.UTF-8
+export LC_ALL=en_GB.UTF-8
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+. "$HOME/.local/bin/env"
 
 
 # Android
@@ -10,8 +42,6 @@ export PATH="$ANDROID_HOME/emulator:$PATH"
 
 export CLICOLOR=1
 export LSCOLORS=ExFxCxDxBxegedabagacad
-export LC_ALL=en_GB.UTF-8
-export LANG=en_GB.UTF-8
 
 export EDITOR=nano
 # export EDITOR="/opt/homebrew/bin/zed -w"
@@ -38,7 +68,7 @@ export OPENROUTER_API_KEY="sk-or-v1-"
 
 export GOOGLE_MAPS_API_KEY=""
 
-export CHROME_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+# export CHROME_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # export CHROME_EXECUTABLE="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 
 
@@ -70,3 +100,7 @@ if [ -z "$SSH_AUTH_SOCK" ]; then
     eval "$(ssh-agent -s)" >/dev/null
     ssh-add ~/.ssh/id_ed25519
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/championswimmer/.lmstudio/bin"
+# End of LM Studio CLI section
