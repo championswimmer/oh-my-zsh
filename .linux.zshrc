@@ -13,20 +13,10 @@ if (( ! ${fpath[(I)/usr/local/share/zsh/site-functions]} )); then
 fi
 
 # Path to your oh-my-zsh installation.
-export ZSH=/Users/championswimmer/.oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
 
 # autoload -U compinit && compinit
 
-# Autocomplete
-source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-bindkey              '^I' menu-select
-bindkey "$terminfo[kcbt]" menu-select
-
-# Github Copilot Bindings
-export ZSH_COPILOT_AI_PROVIDER="openai"
-export ZSH_COPILOT_KEY="^@"
-# bindkey '^_' zsh_gh_copilot_explain  # bind Option+? to explain
-# bindkey '^@' zsh_gh_copilot_suggest  # bind Option+Space to suggest
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -89,26 +79,35 @@ ZSH_AUTOSUGGEST_STRATEGY=(
 plugins=(
 	dotenv
 	direnv
-	zsh-autosuggestions
-	zsh-autocomplete
 #	git
 	github
-	heroku
-	yarn
 	zsh-completions
-	brew
+# brew
 	docker
 	zsh-nvm
-	ember-cli
 #	npm
 	zsh-npm-scripts-autocomplete
 	rbenv
 	bun
-	yarn
-	zsh-copilot
+	zsh-llm-assist
+	zsh-autosuggestions
+	zsh-autocomplete
 )
 
 source $ZSH/oh-my-zsh.sh
+
+# Autocomplete
+bindkey              '^I' menu-select
+bindkey "$terminfo[kcbt]" menu-select
+
+
+# ZSH LLM Assist Configuration
+export ZSH_LLM_CLI_TOOL="claude" # copilot, gemini, claude, codex
+# export ZSH_LLM_CLI_DEBUG=true
+bindkey '^_' llm_explain # bind Option+? to explain
+bindkey '^@' llm_suggest # bind Option+Space to suggest
+
+
 
 # User configuration
 
@@ -139,10 +138,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias pg_start='brew services start postgresql'
-alias pg_stop='brew services stop postgresql'
-alias pg_restart='brew services restart postgresql'
-alias bash='/opt/homebrew/bin/bash -l'
+#alias pg_start='brew services start postgresql'
+#alias pg_stop='brew services stop postgresql'
+#alias pg_restart='brew services restart postgresql'
+#alias bash='/opt/homebrew/bin/bash -l'
 
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 alias ls='ls --color -p'
@@ -152,8 +151,8 @@ eval "$(rbenv init -)"
 unalias git
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="/Users/championswimmer/.sdkman"
-[[ -s "/Users/championswimmer/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/championswimmer/.sdkman/bin/sdkman-init.sh"
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 
 # Load Powerlevel10k configuration.
@@ -163,19 +162,16 @@ export SDKMAN_DIR="/Users/championswimmer/.sdkman"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 # bun completions
-[ -s "/Users/championswimmer/.oh-my-zsh/completions/_bun" ] && source "/Users/championswimmer/.oh-my-zsh/completions/_bun"
+[ -s "$HOME/.oh-my-zsh/completions/_bun" ] && source "$HOME/.oh-my-zsh/completions/_bun"
 
-# Added by Windsurf
-export PATH="/Users/championswimmer/.codeium/windsurf/bin:$PATH"
-
-export PATH="/Users/championswimmer/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # opencode
-export PATH=/Users/championswimmer/.opencode/bin:$PATH
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"
+export PATH=$HOME/.opencode/bin:$PATH
 
 # Use oh-my-posh instead of powerlevel10k
 setopt TRANSIENT_RPROMPT
 eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
+
+# Added by Antigravity
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"

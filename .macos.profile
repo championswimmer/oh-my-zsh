@@ -115,6 +115,7 @@ export LANG=en_US.UTF-8
 export EDITOR="/opt/homebrew/bin/zed -w"
 
 
+# Tokens
 export GITHUB_TOKEN=""
 export V18_GITHUB_TOKEN=""
 export TWITTER_BEARER_TOKEN="xxx"
