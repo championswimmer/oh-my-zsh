@@ -22,3 +22,6 @@
 [submodule "custom/plugins/zsh-llm-assist"]
 	path = custom/plugins/zsh-llm-assist
 	url = https://github.com/championswimmer/zsh-llm-assist
+[submodule "custom/plugins/zsh-npm-scripts-autocomplete"]
+	path = custom/plugins/zsh-npm-scripts-autocomplete
+	url = https://github.com/grigorii-zander/zsh-npm-scripts-autocomplete
