@@ -108,7 +108,6 @@ bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
 
 
-
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -175,3 +174,11 @@ eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
 
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+# OpenClaw Completion
+source <(openclaw completion --shell zsh)
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
