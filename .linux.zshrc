@@ -79,7 +79,7 @@ ZSH_AUTOSUGGEST_STRATEGY=(
 plugins=(
 	dotenv
 	direnv
-#	git
+	git
 	github
 	zsh-completions
 # brew
@@ -100,9 +100,12 @@ source $ZSH/oh-my-zsh.sh
 bindkey              '^I' menu-select
 bindkey "$terminfo[kcbt]" menu-select
 
+# Place this AFTER sourcing zsh-autocomplete
+# zstyle ':completion:*:*:*:*:parameters' verbose no
+zstyle ':completion:*:parameters' list-colors '=*=90'
 
 # ZSH LLM Assist Configuration
-export ZSH_LLM_CLI_TOOL="claude" # copilot, gemini, claude, codex
+export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
 # export ZSH_LLM_CLI_DEBUG=true
 bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
@@ -175,9 +178,6 @@ eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="$HOME/.npm-global/bin:$PATH"
-
-# OpenClaw Completion
-source <(openclaw completion --shell zsh)
 
 # bun
 export BUN_INSTALL="$HOME/.bun"

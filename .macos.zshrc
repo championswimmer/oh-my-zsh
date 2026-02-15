@@ -102,7 +102,7 @@ bindkey "$terminfo[kcbt]" menu-select
 
 
 # ZSH LLM Assist Configuration
-export ZSH_LLM_CLI_TOOL="claude" # copilot, gemini, claude, codex
+export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
 # export ZSH_LLM_CLI_DEBUG=true
 bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
