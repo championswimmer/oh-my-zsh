@@ -1,7 +1,13 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+if [ -d "$HOME/bin" ] ; then
+    export PATH="$HOME/bin:$PATH"
+fi
 
-export PATH="$HOME/bin:${PATH}"
+if [ -d "$HOME/.local/bin" ] ; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
@@ -115,13 +121,9 @@ export LANG=en_US.UTF-8
 export EDITOR="/opt/homebrew/bin/zed -w"
 
 
-# Tokens
 export GITHUB_TOKEN=""
 export V18_GITHUB_TOKEN=""
-export TWITTER_BEARER_TOKEN="xxx"
 export VSCODE_MARKETPLACE_TOKEN="xxx"
-export BITBUCKET_KEY="xxx"
-export BITBUCKET_SECRET="xxx"
 
 # AI Keys
 export ANTHROPIC_API_KEY="sk-ant-api03--qjFNggAA"
@@ -134,6 +136,8 @@ export XAI_API_KEY="xai-"
 export PERPLEXITY_API_KEY="pplx-"
 export DEEPINFRA_API_KEY=""
 export OPENROUTER_API_KEY="sk-or-v1-"
+export CEREBRAS_API_KEY=""
+export MINIMAX_API_KEY=""
 
 export GOOGLE_MAPS_API_KEY=""
 
@@ -202,3 +206,8 @@ ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"
+
+eval "$(env-sync load --quiet 2>/dev/null)"
+
+# Added by Antigravity CLI installer
+export PATH="/Users/championswimmer/.local/bin:$PATH"

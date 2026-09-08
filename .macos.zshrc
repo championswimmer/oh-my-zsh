@@ -1,3 +1,4 @@
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -103,6 +104,7 @@ bindkey "$terminfo[kcbt]" menu-select
 
 # ZSH LLM Assist Configuration
 export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
+export ZSH_LLM_CLI_MODEL="gemini-3-flash"
 # export ZSH_LLM_CLI_DEBUG=true
 bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
@@ -141,7 +143,6 @@ bindkey '^@' llm_suggest # bind Option+Space to suggest
 alias pg_start='brew services start postgresql'
 alias pg_stop='brew services stop postgresql'
 alias pg_restart='brew services restart postgresql'
-alias bash='/opt/homebrew/bin/bash -l'
 
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 alias ls='ls --color -p'
@@ -164,7 +165,8 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 # bun completions
 [ -s "$HOME/.oh-my-zsh/completions/_bun" ] && source "$HOME/.oh-my-zsh/completions/_bun"
 
-export PATH="$HOME/.local/bin:$PATH"
+# Added by Windsurf
+export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
@@ -178,3 +180,14 @@ eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
 
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/championswimmer/.local/bin:$PATH"
+
+# GitHub MCP server auth (reuses gh CLI keyring token)
+export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token)
