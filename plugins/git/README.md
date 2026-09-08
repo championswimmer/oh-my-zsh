@@ -45,7 +45,7 @@ plugins=(... git)
 | `gbgD`                 | `LANG=C git branch --no-color -vv \| grep ": gone\]" \| cut -c 3- \| awk '"'"'{print $1}'"'"' \| xargs git branch -D`           |
 | `gbm`                  | `git branch --move`                                                                                                             |
 | `gbnm`                 | `git branch --no-merged`                                                                                                        |
-| `gbr`                  | `git branch --remote`                                                                                                           |
+| `gbr`                  | `git branch --remotes`                                                                                                          |
 | `ggsup`                | `git branch --set-upstream-to=origin/$(git_current_branch)`                                                                     |
 | `gbg`                  | `LANG=C git branch -vv \| grep ": gone\]"`                                                                                      |
 | `gco`                  | `git checkout`                                                                                                                  |
@@ -181,6 +181,8 @@ plugins=(... git)
 | `grst`                 | `git restore --staged`                                                                                                          |
 | `gunwip`               | `git rev-list --max-count=1 --format="%s" HEAD \| grep -q "--wip--" && git reset HEAD~1`                                        |
 | `grev`                 | `git revert`                                                                                                                    |
+| `greva`                | `git revert --abort`                                                                                                            |
+| `grevc`                | `git revert --continue`                                                                                                         |
 | `grm`                  | `git rm`                                                                                                                        |
 | `grmc`                 | `git rm --cached`                                                                                                               |
 | `gcount`               | `git shortlog --summary -n`                                                                                                     |
@@ -215,6 +217,7 @@ plugins=(... git)
 | `gunignore`            | `git update-index --no-assume-unchanged`                                                                                        |
 | `gwch`                 | `git log --patch --abbrev-commit --pretty=medium --raw`                                                                         |
 | `gwt`                  | `git worktree`                                                                                                                  |
+| `gwta`                 | `git worktree add`                                                                                                              |
 | `gwtls`                | `git worktree list`                                                                                                             |
 | `gwtmv`                | `git worktree move`                                                                                                             |
 | `gwtrm`                | `git worktree remove`                                                                                                           |
