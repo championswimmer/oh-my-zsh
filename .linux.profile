@@ -46,13 +46,9 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 export EDITOR=nano
 # export EDITOR="/opt/homebrew/bin/zed -w"
 
-# Tokens
 export GITHUB_TOKEN=""
 export V18_GITHUB_TOKEN=""
-export TWITTER_BEARER_TOKEN="xxx"
 export VSCODE_MARKETPLACE_TOKEN="xxx"
-export BITBUCKET_KEY="xxx"
-export BITBUCKET_SECRET="xxx"
 
 # AI Keys
 export ANTHROPIC_API_KEY="sk-ant-api03--qjFNggAA"
@@ -65,6 +61,8 @@ export XAI_API_KEY="xai-"
 export PERPLEXITY_API_KEY="pplx-"
 export DEEPINFRA_API_KEY=""
 export OPENROUTER_API_KEY="sk-or-v1-"
+export CEREBRAS_API_KEY=""
+export MINIMAX_API_KEY=""
 
 export GOOGLE_MAPS_API_KEY=""
 
@@ -104,3 +102,8 @@ fi
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/championswimmer/.lmstudio/bin"
 # End of LM Studio CLI section
+
+eval "$(env-sync load --quiet 2>/dev/null)"
+
+# Added by Antigravity CLI installer
+export PATH="$HOME/.local/bin:$PATH"

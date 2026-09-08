@@ -1,3 +1,4 @@
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -106,6 +107,7 @@ zstyle ':completion:*:parameters' list-colors '=*=90'
 
 # ZSH LLM Assist Configuration
 export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
+export ZSH_LLM_CLI_MODEL="gemini-3-flash"
 # export ZSH_LLM_CLI_DEBUG=true
 bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
@@ -168,8 +170,14 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Added by Windsurf
+export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.cache/lm-studio/bin"
 
 # Use oh-my-posh instead of powerlevel10k
 setopt TRANSIENT_RPROMPT
@@ -182,3 +190,6 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# GitHub MCP server auth (reuses gh CLI keyring token)
+export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token)
