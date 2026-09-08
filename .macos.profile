@@ -155,6 +155,9 @@ export PATH="$HOME/.cargo/bin:${PATH}"
 export VCPKG_ROOT="$HOME/bin/vcpkg"
 export PATH="$VCPKG_ROOT:$PATH"
 
+# Bun
+export PATH="$HOME/.bun/bin:$PATH"
+
 export PATH="${PATH}:$HOME/.pub-cache/bin"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
