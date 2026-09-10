@@ -92,8 +92,10 @@ plugins=(
 	bun
 	zsh-llm-assist
 	zsh-autosuggestions
-	zsh-autocomplete
 )
+
+# zsh-autocomplete must be sourced BEFORE oh-my-zsh (it runs its own compinit).
+source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 
 source $ZSH/oh-my-zsh.sh
 
