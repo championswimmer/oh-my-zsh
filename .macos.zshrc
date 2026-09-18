@@ -114,6 +114,10 @@ add-zsh-hook precmd _fix_autosuggest_history_menu
 bindkey              '^I' menu-select
 bindkey "$terminfo[kcbt]" menu-select
 
+# Shift+Right accepts just the next word of the autosuggestion (forward-word is already
+# a partial-accept widget by default); plain Right Arrow still accepts the whole thing.
+bindkey "$terminfo[kRIT]" forward-word
+
 
 # ZSH LLM Assist Configuration
 export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
