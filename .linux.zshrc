@@ -152,7 +152,7 @@ bindkey '^@' llm_suggest # bind Option+Space to suggest
 alias nicedate='date "+ %Y-%m-%d_%H:%M:%p"'
 alias ls='ls --color -p'
 
-eval "$(rbenv init -)"
+command -v rbenv >/dev/null 2>&1 && eval "$(rbenv init -)"
 
 unalias git
 

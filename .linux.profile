@@ -47,7 +47,6 @@ export EDITOR=nano
 # export EDITOR="/opt/homebrew/bin/zed -w"
 
 export GITHUB_TOKEN=""
-export V18_GITHUB_TOKEN=""
 export VSCODE_MARKETPLACE_TOKEN="" # "xxx"
 
 # AI Keys

@@ -13,6 +13,9 @@
 #      Whenever a destination file already existed (merged or appended), the old
 #      version is preserved as a <dest>.bak.<timestamp> file first.
 #   4. Installs .p10k.zsh to $HOME (p10k.omp.json already lives inside this repo, no copy needed).
+#   5. If oh-my-posh (used as the prompt in the installed .zshrc) isn't already
+#      installed and Homebrew is available, asks to install it via 'brew install
+#      oh-my-posh'. --uninstall does not remove it.
 #
 # --uninstall reverses step 3/4 using the state file this script writes at
 # $HOME/.oh-my-zsh-install-state during install: for each file that install
@@ -243,7 +246,26 @@ fi
 : > "$STATE_FILE"
 
 # ---------------------------------------------------------------------------
-# 4. Install .zshrc / .profile (/ .zprofile on macOS) / .p10k.zsh
+# 4. Install oh-my-posh via Homebrew if it's missing
+# ---------------------------------------------------------------------------
+
+if ! command -v oh-my-posh >/dev/null 2>&1; then
+  if command -v brew >/dev/null 2>&1; then
+    echo ""
+    echo "oh-my-posh isn't installed, but the .$OS.zshrc being installed uses it as the prompt."
+    read -r -p "Install it now via 'brew install oh-my-posh'? [y/N] " reply
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+      brew install oh-my-posh
+    else
+      echo "  -> skipping oh-my-posh install. The prompt line in .$OS.zshrc will fail until you install it yourself."
+    fi
+  else
+    echo "warning: oh-my-posh isn't installed and 'brew' isn't available either; skipping. Install oh-my-posh yourself, or the prompt line in .$OS.zshrc will fail."
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 5. Install .zshrc / .profile (/ .zprofile on macOS) / .p10k.zsh
 # ---------------------------------------------------------------------------
 
 install_dotfile "$OMZ_DIR/.$OS.zshrc"   "$HOME/.zshrc"   ".zshrc"

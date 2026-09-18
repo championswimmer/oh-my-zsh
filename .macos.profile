@@ -122,7 +122,6 @@ export EDITOR="/opt/homebrew/bin/zed -w"
 
 
 export GITHUB_TOKEN=""
-export V18_GITHUB_TOKEN=""
 export VSCODE_MARKETPLACE_TOKEN="" # "xxx"
 
 # AI Keys
@@ -181,17 +180,7 @@ function hub() {
 }
 
 alias gh_cli=$(which gh)
-# function gh() {
-#  if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
-#	  	GHU="Arnav-Gupta_viacom18"
-#	  	GHT=$V18_GITHUB_TOKEN
-#  	else
-#		GHU="championswimmer"
-#	  	GHT=$GITHUB_TOKEN
-#  	fi
-#
-#  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT gh_cli $@
-#}
+
 function gh() {
   unset GITHUB_TOKEN
   gh_cli $@
