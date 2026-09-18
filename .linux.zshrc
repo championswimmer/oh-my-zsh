@@ -99,6 +99,20 @@ source $HOME/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.
 
 source $ZSH/oh-my-zsh.sh
 
+# Fix: zsh-autocomplete creates its own widgets (history-search-backward, menu-search)
+# inside a precmd hook that runs after zsh-autosuggestions' one-time widget binding pass,
+# and zsh-autocomplete disables autosuggestions' automatic rebind-on-new-widgets safety
+# net (ZSH_AUTOSUGGEST_MANUAL_REBIND=1). Left unbound, autosuggestions never clears a
+# pending ghost suggestion when the Alt+Up history menu opens, so stale ghost text gets
+# stranded (as real-looking text) after the menu's ';' suffix while cycling matches.
+_fix_autocomplete_autosuggest_widgets() {
+  ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${ZSH_AUTOSUGGEST_IGNORE_WIDGETS:#history-search-backward})
+  ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${ZSH_AUTOSUGGEST_IGNORE_WIDGETS:#menu-search})
+  ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-search-backward menu-search)
+  _zsh_autosuggest_bind_widgets
+}
+add-zsh-hook precmd _fix_autocomplete_autosuggest_widgets
+
 # Autocomplete
 bindkey              '^I' menu-select
 bindkey "$terminfo[kcbt]" menu-select
