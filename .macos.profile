@@ -191,7 +191,7 @@ alias env_priv="env | cut -d= -f1"
 ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519
 
 
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"

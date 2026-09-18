@@ -81,7 +81,7 @@ export PATH="$GOPATH/bin:${PATH}"
 # export PATH="$HOME/.cargo/bin:${PATH}"
 # export VCPKG_ROOT="$HOME/bin/vcpkg"
 # export PATH="$VCPKG_ROOT:$PATH"
-# . "$HOME/.cargo/env"
+# [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # export PATH="${PATH}:$HOME/.pub-cache/bin"
 # export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
@@ -91,7 +91,7 @@ alias hs="npx live-server"
 
 alias env_priv="env | cut -d= -f1"
 
-# . "$HOME/.cargo/env"
+# [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # ---- SSH agent: one per login session ----
 if [ -z "$SSH_AUTH_SOCK" ]; then
