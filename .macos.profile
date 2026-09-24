@@ -11,105 +11,106 @@ fi
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
-# export CC="/opt/homebrew/opt/llvm/bin/clang" CXX="/opt/homebrew/opt/llvm/bin/clang++"
-# export CC="/usr/bin/clang" CXX="/usr/bin/clang++"
-export CC="/opt/homebrew/opt/llvm@18/bin/clang" CXX="/opt/homebrew/opt/llvm@18/bin/clang++"
+# # export CC="/opt/homebrew/opt/llvm/bin/clang" CXX="/opt/homebrew/opt/llvm/bin/clang++"
+# # export CC="/usr/bin/clang" CXX="/usr/bin/clang++"
+
+export CC="/opt/homebrew/opt/llvm@22/bin/clang" CXX="/opt/homebrew/opt/llvm@22/bin/clang++"
 export CMAKE_C_COMPILER="$C" CMAKE_CXX_COMPILER="$CXX"
 export CFLAGS="-arch arm64"
 export CXXFLAGS="-arch arm64"
 
-export CMAKE_POLICY_VERSION_MINIMUM=3.10
+# export CMAKE_POLICY_VERSION_MINIMUM=3.10
 
-#curl
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+# #curl
+# export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 
-# coreutils
-export PATH="$PATH:/opt/homebrew/opt/coreutils/libexec/gnubin"
+# # coreutils
+# export PATH="$PATH:/opt/homebrew/opt/coreutils/libexec/gnubin"
 
 # homebrew defaults
 export PATH="$PATH:/opt/homebrew/bin"
 export LDFLAGS=" $LDFLAGS -L/opt/homebrew/lib"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/lib/pkgconfig"
 
-# glib
-export PATH="/opt/homebrew/opt/glib/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/glib/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/glib/include $CPPFLAGS"
+# # glib
+# export PATH="/opt/homebrew/opt/glib/bin:$PATH"
+# export LDFLAGS="-L/opt/homebrew/opt/glib/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/glib/include $CPPFLAGS"
 
 
-# binutils
-export PATH="$PATH:/opt/homebrew/opt/binutils/bin"
-export LDFLAGS="-L/opt/homebrew/opt/binutils/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/binutils/include $CPPFLAGS"
+# # binutils
+# export PATH="$PATH:/opt/homebrew/opt/binutils/bin"
+# export LDFLAGS="-L/opt/homebrew/opt/binutils/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/binutils/include $CPPFLAGS"
 
-# readline
-export LDFLAGS="-L/opt/homebrew/opt/readline/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/readline/include $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # readline
+# export LDFLAGS="-L/opt/homebrew/opt/readline/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/readline/include $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/readline/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# zlib
-export LDFLAGS="-L/opt/homebrew/opt/zlib/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/zlib/include $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # zlib
+# export LDFLAGS="-L/opt/homebrew/opt/zlib/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/zlib/include $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/zlib/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# opencv
-export LDFLAGS="-L/opt/homebrew/opt/opencv/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/opencv/include $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/opencv/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # opencv
+# export LDFLAGS="-L/opt/homebrew/opt/opencv/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/opencv/include $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/opencv/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# libraw
-# export LDFLAGS="-L/opt/homebrew/opt/libraw/lib $LDFLAGS"
-# export CPPFLAGS="-I/opt/homebrew/opt/libraw/include $CPPFLAGS"
-# export PKG_CONFIG_PATH="/opt/homebrew/opt/libraw/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # libraw
+# # export LDFLAGS="-L/opt/homebrew/opt/libraw/lib $LDFLAGS"
+# # export CPPFLAGS="-I/opt/homebrew/opt/libraw/include $CPPFLAGS"
+# # export PKG_CONFIG_PATH="/opt/homebrew/opt/libraw/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# FFI
-export LDFLAGS="-L/opt/homebrew/opt/libffi/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/libffi/include $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # FFI
+# export LDFLAGS="-L/opt/homebrew/opt/libffi/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/libffi/include $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# LLVM
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/llvm/lib ${LDFLAGS}"
-export CPPFLAGS="-I/opt/homebrew/opt/llvm/include ${CPPFLAGS}"
+# # LLVM
+# export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+# export LDFLAGS="-L/opt/homebrew/opt/llvm/lib ${LDFLAGS}"
+# export CPPFLAGS="-I/opt/homebrew/opt/llvm/include ${CPPFLAGS}"
 
-# JPEG Turbo
-# export LDFLAGS="-L/opt/homebrew/opt/libjpeg-turbo/lib ${LDFLAGS}"
-# export CPPFLAGS="-I/opt/homebrew/opt/libjpeg-turbo/include ${CPPFLAGS}"
-# export PKG_CONFIG_PATH="/opt/homebrew/opt/libjpeg-turbo/lib/pkgconfig:$PKG_CONFIG_PATH"
-# export TURBOJPEG_LIB_PATH="/opt/homebrew/opt/libjpeg-turbo/lib"
+# # JPEG Turbo
+# # export LDFLAGS="-L/opt/homebrew/opt/libjpeg-turbo/lib ${LDFLAGS}"
+# # export CPPFLAGS="-I/opt/homebrew/opt/libjpeg-turbo/include ${CPPFLAGS}"
+# # export PKG_CONFIG_PATH="/opt/homebrew/opt/libjpeg-turbo/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # export TURBOJPEG_LIB_PATH="/opt/homebrew/opt/libjpeg-turbo/lib"
 
-# jpeg-xl
-# export LDFLAGS="-L/opt/homebrew/opt/jpeg-xl/lib $LDFLAGS"
-# export CPPFLAGS="-I/opt/homebrew/opt/jpeg-xl/include  $CPPFLAGS"
-# export PKG_CONFIG_PATH="/opt/homebrew/opt/jpeg-xl/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # jpeg-xl
+# # export LDFLAGS="-L/opt/homebrew/opt/jpeg-xl/lib $LDFLAGS"
+# # export CPPFLAGS="-I/opt/homebrew/opt/jpeg-xl/include  $CPPFLAGS"
+# # export PKG_CONFIG_PATH="/opt/homebrew/opt/jpeg-xl/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# libomp
-# export LDFLAGS="-L/opt/homebrew/opt/libomp/lib $LDFLAGS"
-# export CPPFLAGS="-I/opt/homebrew/opt/libomp/include $CPPFLAGS"
+# # libomp
+# # export LDFLAGS="-L/opt/homebrew/opt/libomp/lib $LDFLAGS"
+# # export CPPFLAGS="-I/opt/homebrew/opt/libomp/include $CPPFLAGS"
 
-# SQlite
-export LDFLAGS="-L/opt/homebrew/opt/sqlite/lib  $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/sqlite/include  $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/sqlite/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # SQlite
+# export LDFLAGS="-L/opt/homebrew/opt/sqlite/lib  $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/sqlite/include  $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/sqlite/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# openssl
-export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib $LDFLAGS"
-export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include  $CPPFLAGS"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
+# # openssl
+# export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
+# export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib $LDFLAGS"
+# export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include  $CPPFLAGS"
+# export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# Python
-export PATH="/opt/homebrew/opt/python@3/libexec/bin/:$PATH"
+# # Python
+# export PATH="/opt/homebrew/opt/python@3/libexec/bin/:$PATH"
 
-# Android
-export ANDROID_HOME="$HOME/Library/Android/sdk"
-export PATH="$ANDROID_HOME/platform-tools:$PATH"
-export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-export PATH="$ANDROID_HOME/build-tools/latest:$PATH"
-export PATH="$ANDROID_HOME/emulator:$PATH"
+# # Android
+# export ANDROID_HOME="$HOME/Library/Android/sdk"
+# export PATH="$ANDROID_HOME/platform-tools:$PATH"
+# export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+# export PATH="$ANDROID_HOME/build-tools/latest:$PATH"
+# export PATH="$ANDROID_HOME/emulator:$PATH"
 
-# export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
+# # export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+# export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
 
 export CLICOLOR=1
 export LSCOLORS=ExFxCxDxBxegedabagacad
@@ -138,6 +139,7 @@ export OPENROUTER_API_KEY="" # "sk-or-v1-"
 export CEREBRAS_API_KEY=""
 export MINIMAX_API_KEY=""
 
+# API Keys
 export GOOGLE_MAPS_API_KEY=""
 
 export CHROME_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -145,9 +147,9 @@ export CHROME_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google 
 
 export NVM_DIR="$HOME/.nvm"
 
-# Gradle
-export GRADLE_HOME="$HOME/.sdkman/candidates/gradle/current"
-export GRADLE_USER_HOME="$HOME/.gradle"
+# # Gradle
+# export GRADLE_HOME="$HOME/.sdkman/candidates/gradle/current"
+# export GRADLE_USER_HOME="$HOME/.gradle"
 
 # Go
 export GOPATH="$HOME/.go"
@@ -188,15 +190,9 @@ function gh() {
 
 alias env_priv="env | cut -d= -f1"
 
-ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519
+ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519_github
 
 
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"
-
 eval "$(env-sync load --quiet 2>/dev/null)"
-
-# Added by Antigravity CLI installer
-export PATH="/Users/championswimmer/.local/bin:$PATH"

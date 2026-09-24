@@ -1,3 +1,26 @@
+export PATH="$HOME/.local/bin:$PATH"
+export GITHUB_USER="championswimmer"
+
+# Let Hub reuse the active championswimmer token from GitHub CLI without
+# copying the credential into this file or exporting it to every process.
+hub() {
+  local github_token
+  github_token="$(command gh auth token --hostname github.com --user championswimmer)" || return
+  GITHUB_TOKEN="$github_token" command hub "$@"
+}
+
+export GOPATH=$HOME/go
+export PATH=$PATH:$(go env GOPATH)/bin
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/arnav/.docker/completions $fpath)
+autoload -Uz compinit
+(( ${+_comps[docker]} )) || compinit
+# End of Docker CLI completions
+
+# >>> railway initialize >>>
+source "$HOME/.railway/env"
+# <<< railway initialize <<<
+eval "$(/usr/bin/env PATH_HELPER_ROOT="$HOME/.raildev" /usr/libexec/path_helper -s)"
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -88,7 +111,7 @@ plugins=(
 	zsh-nvm
 #	npm
 	zsh-npm-scripts-autocomplete
-	rbenv
+#	rbenv
 	bun
 	zsh-llm-assist
 	zsh-autosuggestions
@@ -189,6 +212,7 @@ export PATH=$HOME/.opencode/bin:$PATH
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.cache/lm-studio/bin"
+# End of LM Studio CLI section
 
 # Use oh-my-posh instead of powerlevel10k
 setopt TRANSIENT_RPROMPT
@@ -197,13 +221,109 @@ eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/championswimmer/.cache/lm-studio/bin"
-# End of LM Studio CLI section
-
-
 # Added by Antigravity CLI installer
 export PATH="/Users/championswimmer/.local/bin:$PATH"
 
 # GitHub MCP server auth (reuses gh CLI keyring token)
 export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token)
+
+if command -v wt >/dev/null 2>&1; then
+  eval "$(command wt config shell init zsh)"
+
+  # `wt switch --create` rejects an existing branch. Switch normally when the
+  # branch exists instead: Worktrunk will reuse its linked worktree, or create
+  # one for an existing branch that is not currently checked out.
+  wt-cmd() {
+    (( $# >= 2 )) || { print -u2 'usage: wt-cmd <claude|codex|pi> <branch> [--base <branch>] [args...]'; return 2; }
+    local agent=$1 branch=$2 base=''
+    local -a agent_args
+    shift 2
+    case $agent in claude|codex|pi) ;; *) print -u2 'usage: wt-cmd <claude|codex|pi> <branch> [--base <branch>] [args...]'; return 2 ;; esac
+
+    # `--base` belongs to Worktrunk, while everything else remains an argument
+    # to the agent. A `--` stops wrapper parsing so an agent can still receive
+    # its own `--base` option.
+    while (( $# )); do
+      case $1 in
+        --base)
+          (( $# >= 2 )) || { print -u2 'wt-cmd: --base requires a branch'; return 2; }
+          base=$2
+          shift 2
+          ;;
+        --base=*)
+          base=${1#--base=}
+          [[ -n $base ]] || { print -u2 'wt-cmd: --base requires a branch'; return 2; }
+          shift
+          ;;
+        --)
+          shift
+          agent_args+=("$@")
+          break
+          ;;
+        *)
+          agent_args+=("$1")
+          shift
+          ;;
+      esac
+    done
+
+    if command git show-ref --verify --quiet "refs/heads/$branch"; then
+      [[ -z $base ]] || { print -u2 "wt-cmd: $branch already exists; --base only applies when creating a branch"; return 2; }
+      wt switch "$branch" --execute "$agent" -- "${agent_args[@]}"
+    elif [[ -n $base ]]; then
+      wt switch --create "$branch" --base "$base" --execute "$agent" -- "${agent_args[@]}"
+    else
+      wt switch --create "$branch" --execute "$agent" -- "${agent_args[@]}"
+    fi
+  }
+  # Agent subcommands retain Worktrunk's directory-switching and completion behavior.
+  # Keep a copy of Worktrunk's shell wrapper so normal subcommands retain its
+  # directory-switching and dynamically generated completion behavior.
+  functions -c wt _wt_worktrunk
+  wt() {
+    case ${1-} in
+      claude|codex|pi)
+        local agent=$1
+        shift
+        wt-cmd "$agent" "$@"
+        ;;
+      *) _wt_worktrunk "$@" ;;
+    esac
+  }
+
+  # Worktrunk's own `switch` completion includes branches that are not linked
+  # worktrees. Agent commands intentionally complete only active worktrees.
+  _wt_active_worktree_names() {
+    local line
+    while IFS= read -r line; do
+      case $line in
+        'branch refs/heads/'*) print -r -- "${line#branch refs/heads/}" ;;
+      esac
+    done < <(command git worktree list --porcelain 2>/dev/null)
+  }
+  _wt_complete_active_worktree() {
+    local -a worktrees
+    worktrees=("${(@f)$(_wt_active_worktree_names)}")
+    (( $#worktrees )) && _describe -t worktrees 'active worktree' worktrees
+  }
+  _wt_complete_local_branch() {
+    local -a branches
+    branches=("${(@f)$(command git for-each-ref --format='%(refname:short)' refs/heads 2>/dev/null)}")
+    (( $#branches )) && _describe -t branches 'local branch' branches
+  }
+  _wt_complete() {
+    local -a agents
+    agents=(claude codex pi)
+    if (( CURRENT == 2 )); then
+      _wt_lazy_complete "$@"
+      _describe -t agents agent agents
+    elif (( CURRENT == 3 )) && [[ ${words[2]} == (claude|codex|pi) ]]; then
+      _wt_complete_active_worktree
+    elif (( CURRENT == 4 )) && [[ ${words[2]} == (claude|codex|pi) && ${words[3]} == --base ]]; then
+      _wt_complete_local_branch
+    else
+      _wt_lazy_complete "$@"
+    fi
+  }
+  compdef _wt_complete wt
+fi
