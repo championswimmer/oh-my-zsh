@@ -32,10 +32,6 @@ eval "$(/usr/bin/env PATH_HELPER_ROOT="$HOME/.raildev" /usr/libexec/path_helper 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-if (( ! ${fpath[(I)/usr/local/share/zsh/site-functions]} )); then
-  FPATH=/usr/local/share/zsh/site-functions:$FPATH
-fi
-
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -216,13 +212,10 @@ export PATH="$PATH:$HOME/.cache/lm-studio/bin"
 
 # Use oh-my-posh instead of powerlevel10k
 setopt TRANSIENT_RPROMPT
-eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
+eval "$(oh-my-posh init zsh --config "$HOME/.oh-my-zsh/p10k.omp.json")"
 
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
-
-# Added by Antigravity CLI installer
-export PATH="/Users/championswimmer/.local/bin:$PATH"
 
 # GitHub MCP server auth (reuses gh CLI keyring token)
 export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token)

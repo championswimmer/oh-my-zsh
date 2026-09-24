@@ -1,7 +1,7 @@
-emulate sh -c '. ~/.profile'
+# Zsh does not read ~/.profile on its own.
+[[ -r "$HOME/.profile" ]] && source "$HOME/.profile"
 
 # Added by Toolbox App
-export PATH="$PATH:/Users/championswimmer/Library/Application Support/JetBrains/Toolbox/scripts"
-
-# Added by Antigravity CLI installer
-export PATH="/Users/championswimmer/.local/bin:$PATH"
+if [[ -d "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" ]]; then
+  export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+fi

@@ -287,13 +287,30 @@ fi
 # 4. Install oh-my-posh via Homebrew if it's missing
 # ---------------------------------------------------------------------------
 
+BREW_BIN="$(command -v brew 2>/dev/null || true)"
+if [[ -z "$BREW_BIN" ]]; then
+  if [[ "$OS" == linux ]]; then
+    for candidate in /home/linuxbrew/.linuxbrew/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+      if [[ -x "$candidate" ]]; then BREW_BIN="$candidate"; break; fi
+    done
+  elif [[ "$(uname -m)" == arm64 ]]; then
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+      if [[ -x "$candidate" ]]; then BREW_BIN="$candidate"; break; fi
+    done
+  else
+    for candidate in /usr/local/bin/brew /opt/homebrew/bin/brew; do
+      if [[ -x "$candidate" ]]; then BREW_BIN="$candidate"; break; fi
+    done
+  fi
+fi
+
 if ! command -v oh-my-posh >/dev/null 2>&1; then
-  if command -v brew >/dev/null 2>&1; then
+  if [[ -n "$BREW_BIN" ]]; then
     echo ""
     echo "oh-my-posh isn't installed, but the .$OS.zshrc being installed uses it as the prompt."
     read -r -p "Install it now via 'brew install oh-my-posh'? [y/N] " reply
     if [[ "$reply" =~ ^[Yy]$ ]]; then
-      brew install oh-my-posh
+      "$BREW_BIN" install oh-my-posh
     else
       echo "  -> skipping oh-my-posh install. The prompt line in .$OS.zshrc will fail until you install it yourself."
     fi
@@ -303,15 +320,12 @@ if ! command -v oh-my-posh >/dev/null 2>&1; then
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Install .zshrc / .profile (/ .zprofile on macOS) / .p10k.zsh
+# 5. Install .zshrc / .profile / .zprofile / .p10k.zsh
 # ---------------------------------------------------------------------------
 
 install_dotfile "$OMZ_DIR/.$OS.zshrc"   "$HOME/.zshrc"   ".zshrc"
 install_dotfile "$OMZ_DIR/.$OS.profile" "$HOME/.profile" ".profile"
-
-if [[ "$OS" == "macos" ]]; then
-  install_dotfile "$OMZ_DIR/.macos.zprofile" "$HOME/.zprofile" ".zprofile"
-fi
+install_dotfile "$OMZ_DIR/.$OS.zprofile" "$HOME/.zprofile" ".zprofile"
 
 # p10k.omp.json is referenced by the zshrc as ~/.oh-my-zsh/p10k.omp.json, so it
 # already lives in the right place inside this repo — nothing to copy there.

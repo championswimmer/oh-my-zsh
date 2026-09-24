@@ -1,4 +1,16 @@
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Apple Silicon and Intel Homebrew use different prefixes. Prefer the native
+# prefix, but accept the other one when it is the only installation present.
+case "$(uname -m)" in
+  arm64) _brew_prefix=/opt/homebrew; _brew_fallback=/usr/local ;;
+  *)     _brew_prefix=/usr/local; _brew_fallback=/opt/homebrew ;;
+esac
+if [ ! -x "$_brew_prefix/bin/brew" ]; then
+    _brew_prefix=$_brew_fallback
+fi
+if [ -x "$_brew_prefix/bin/brew" ]; then
+    eval "$("$_brew_prefix/bin/brew" shellenv)"
+fi
+unset _brew_prefix _brew_fallback
 
 if [ -d "$HOME/bin" ] ; then
     export PATH="$HOME/bin:$PATH"
@@ -14,10 +26,11 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 # # export CC="/opt/homebrew/opt/llvm/bin/clang" CXX="/opt/homebrew/opt/llvm/bin/clang++"
 # # export CC="/usr/bin/clang" CXX="/usr/bin/clang++"
 
-export CC="/opt/homebrew/opt/llvm@22/bin/clang" CXX="/opt/homebrew/opt/llvm@22/bin/clang++"
-export CMAKE_C_COMPILER="$C" CMAKE_CXX_COMPILER="$CXX"
-export CFLAGS="-arch arm64"
-export CXXFLAGS="-arch arm64"
+if [ -n "${HOMEBREW_PREFIX:-}" ] && [ -x "$HOMEBREW_PREFIX/opt/llvm@22/bin/clang" ]; then
+    export CC="$HOMEBREW_PREFIX/opt/llvm@22/bin/clang"
+    export CXX="$HOMEBREW_PREFIX/opt/llvm@22/bin/clang++"
+    export CMAKE_C_COMPILER="$CC" CMAKE_CXX_COMPILER="$CXX"
+fi
 
 # export CMAKE_POLICY_VERSION_MINIMUM=3.10
 
@@ -27,10 +40,12 @@ export CXXFLAGS="-arch arm64"
 # # coreutils
 # export PATH="$PATH:/opt/homebrew/opt/coreutils/libexec/gnubin"
 
-# homebrew defaults
-export PATH="$PATH:/opt/homebrew/bin"
-export LDFLAGS=" $LDFLAGS -L/opt/homebrew/lib"
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/lib/pkgconfig"
+# Homebrew's shellenv sets PATH and HOMEBREW_PREFIX. Use the selected prefix
+# for build tools rather than appending a second, architecture-specific bin.
+if [ -n "${HOMEBREW_PREFIX:-}" ]; then
+    export LDFLAGS="${LDFLAGS:+$LDFLAGS }-L$HOMEBREW_PREFIX/lib"
+    export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+fi
 
 # # glib
 # export PATH="/opt/homebrew/opt/glib/bin:$PATH"
@@ -117,9 +132,11 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-# export EDITOR=nano
-# export EDITOR="/opt/homebrew/bin/mate -w"
-export EDITOR="/opt/homebrew/bin/zed -w"
+if command -v zed >/dev/null 2>&1; then
+    export EDITOR="zed -w"
+else
+    export EDITOR=nano
+fi
 
 
 export GITHUB_TOKEN=""
@@ -168,7 +185,6 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
 alias hs="npx live-server"
 
-alias hub_cli="/opt/homebrew/bin/hub"
 function hub() {
   if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
 	  	GHU="Arnav-Gupta_viacom18"
@@ -178,7 +194,7 @@ function hub() {
 	  	GHT=$GITHUB_TOKEN
   	fi
 
-  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT hub_cli $@
+  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT command hub "$@"
 }
 
 alias gh_cli=$(which gh)

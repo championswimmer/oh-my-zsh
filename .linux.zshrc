@@ -19,6 +19,20 @@ hub() {
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+# Login shells get Linuxbrew from ~/.profile; interactive non-login shells
+# need to initialize it here before plugins and prompt tools run.
+if [[ ${HOMEBREW_PREFIX:-} != /home/linuxbrew/.linuxbrew && -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -z ${HOMEBREW_PREFIX:-} && -x "$HOME/.linuxbrew/bin/brew" ]]; then
+  eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
+fi
+
+# The shared Linuxbrew completion directory is group-writable on this setup,
+# which zsh rejects during compinit.
+if [[ ${HOMEBREW_PREFIX:-} == /home/linuxbrew/.linuxbrew ]]; then
+  fpath=(${fpath:#$HOMEBREW_PREFIX/share/zsh/site-functions})
+fi
+
 if (( ! ${fpath[(I)/usr/local/share/zsh/site-functions]} )); then
   FPATH=/usr/local/share/zsh/site-functions:$FPATH
 fi
@@ -207,7 +221,7 @@ export PATH="$PATH:$HOME/.cache/lm-studio/bin"
 
 # Use oh-my-posh instead of powerlevel10k
 setopt TRANSIENT_RPROMPT
-eval "$(oh-my-posh init zsh --config '~/.oh-my-zsh/p10k.omp.json')"
+eval "$(oh-my-posh init zsh --config "$HOME/.oh-my-zsh/p10k.omp.json")"
 
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"

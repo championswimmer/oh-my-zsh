@@ -30,7 +30,14 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-. "$HOME/.local/bin/env"
+# Linuxbrew is installed system-wide on most machines, or under the user's home.
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [ -x "$HOME/.linuxbrew/bin/brew" ]; then
+    eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
+fi
+
+[ -r "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 
 # Android
