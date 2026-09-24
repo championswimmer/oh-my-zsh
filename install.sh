@@ -13,7 +13,9 @@
 #      Whenever a destination file already existed (merged or appended), the old
 #      version is preserved as a <dest>.bak.<timestamp> file first.
 #   4. Installs .p10k.zsh to $HOME (p10k.omp.json already lives inside this repo, no copy needed).
-#   5. If oh-my-posh (used as the prompt in the installed .zshrc) isn't already
+#   5. When an existing dotfile needs merging, detects Claude Code, Codex, and
+#      Pi, then lets the user choose an installed tool (or skip AI merging).
+#   6. If oh-my-posh (used as the prompt in the installed .zshrc) isn't already
 #      installed and Homebrew is available, asks to install it via 'brew install
 #      oh-my-posh'. --uninstall does not remove it.
 #
@@ -98,24 +100,57 @@ record_state() {
   echo "$1|$2" >> "$STATE_FILE"
 }
 
-# Looks for a one-shot LLM CLI we can use for smart merges. Empty string if none found.
-detect_merge_tool() {
-  if command -v claude >/dev/null 2>&1; then
-    echo "claude"
-  elif command -v codex >/dev/null 2>&1; then
-    echo "codex"
-  else
-    echo ""
-  fi
-}
+# The selected one-shot LLM CLI for smart merges. We wait to prompt until a
+# merge is actually needed, so a clean install has no unnecessary question.
+MERGE_TOOL=""
+MERGE_TOOL_DECIDED=false
 
-MERGE_TOOL="$(detect_merge_tool)"
+choose_merge_tool() {
+  local -a tools=()
+  local tool choice index=1
+
+  for tool in claude codex pi; do
+    command -v "$tool" >/dev/null 2>&1 && tools+=("$tool")
+  done
+
+  MERGE_TOOL_DECIDED=true
+  (( ${#tools[@]} )) || return 0
+
+  if [[ ! -t 0 ]]; then
+    echo "  Detected ${tools[*]} CLI, but installation is non-interactive; AI merging is disabled."
+    return 0
+  fi
+
+  echo "  Detected AI merge tools: ${tools[*]}"
+  echo "  Choose one to merge shell config files (or skip AI merging):"
+  for tool in "${tools[@]}"; do
+    echo "    $index) $tool"
+    ((index++))
+  done
+  echo "    s) skip AI merging"
+
+  while true; do
+    read -r -p "  Tool [1-${#tools[@]}/s]: " choice || { echo ""; return 0; }
+    case "$choice" in
+      [sS]|"") return 0 ;;
+      *)
+        if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#tools[@]} )); then
+          MERGE_TOOL="${tools[choice - 1]}"
+          echo "  -> selected '$MERGE_TOOL' for AI merges."
+          return 0
+        fi
+        echo "  Please enter a number from 1 to ${#tools[@]}, or s to skip."
+        ;;
+    esac
+  done
+}
 
 run_merge_tool() {
   local tool="$1" prompt="$2"
   case "$tool" in
     claude) claude -p "$prompt" 2>/dev/null ;;
     codex)  codex exec "$prompt" 2>/dev/null ;;
+    pi)     pi --print "$prompt" 2>/dev/null ;;
   esac
 }
 
@@ -154,9 +189,12 @@ install_dotfile() {
   cp "$dest" "$backup"
   record_state "$dest" "$backup"
 
+  if ! $MERGE_TOOL_DECIDED; then
+    choose_merge_tool
+  fi
+
   if [[ -n "$MERGE_TOOL" ]]; then
-    echo "  Detected '$MERGE_TOOL' CLI on this machine."
-    echo "  It can merge your existing $label with the new one intelligently instead of just appending."
+    echo "  '$MERGE_TOOL' can merge your existing $label with the new one intelligently instead of just appending."
     echo "  Note: this sends the full contents of both files (existing $dest may contain secrets/API keys) to $MERGE_TOOL in one-shot mode."
     read -r -p "  Use $MERGE_TOOL to merge $label? [y/N] " reply
     if [[ "$reply" =~ ^[Yy]$ ]]; then
