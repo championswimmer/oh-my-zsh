@@ -1,0 +1,156 @@
+# worktrunk-herdr — Worktrunk shell integration, agent shortcuts and herdr bridge.
+#
+#   wt  <claude|codex|pi> <branch> [--base <ref>] [agent args...]
+#       Create/reuse a Worktrunk worktree and run the agent in THIS terminal.
+#   wth [<claude|codex|pi>] <branch> [--base <ref>] [agent args...]
+#       Create/reuse a Worktrunk worktree, open it as a herdr workspace and
+#       (optionally) start the agent there. This terminal stays where it is.
+#
+# Worktrunk runs the project's pre-start hooks in both cases. Everything after
+# a literal `--` is passed to the agent untouched (so it can get its own --base).
+
+(( $+commands[wt] )) || return 0
+
+eval "$(command wt config shell init zsh)"
+
+typeset -ga _WT_AGENTS=(claude codex pi)
+
+# Parse `<branch> [--base <ref>] [args...]`.
+# Sets: _wt_branch, _wt_base, _wt_args (array). $1 is the caller name for errors.
+_wt_parse() {
+  local caller=$1; shift
+  typeset -g _wt_branch=$1 _wt_base=''
+  typeset -ga _wt_args=()
+  shift
+  while (( $# )); do
+    case $1 in
+      --base)
+        (( $# >= 2 )) || { print -u2 "$caller: --base requires a branch"; return 2; }
+        _wt_base=$2; shift 2 ;;
+      --base=*)
+        _wt_base=${1#--base=}
+        [[ -n $_wt_base ]] || { print -u2 "$caller: --base requires a branch"; return 2; }
+        shift ;;
+      --) shift; _wt_args+=("$@"); break ;;
+      *)  _wt_args+=("$1"); shift ;;
+    esac
+  done
+}
+
+# Build the `wt switch` arguments for $_wt_branch/$_wt_base into _wt_switch.
+# `wt switch --create` rejects an existing branch, so switch normally then:
+# Worktrunk reuses its linked worktree or creates one for the existing branch.
+_wt_switch_args() {
+  local caller=$1
+  typeset -ga _wt_switch=()
+  if command git show-ref --verify --quiet "refs/heads/$_wt_branch"; then
+    [[ -z $_wt_base ]] || { print -u2 "$caller: $_wt_branch already exists; --base only applies when creating a branch"; return 2; }
+    _wt_switch=("$_wt_branch")
+  else
+    _wt_switch=(--create "$_wt_branch")
+    [[ -z $_wt_base ]] || _wt_switch+=(--base "$_wt_base")
+  fi
+}
+
+# wt <agent> <branch> ... — agent runs in the current terminal.
+wt-cmd() {
+  local usage='usage: wt <claude|codex|pi> <branch> [--base <ref>] [args...]'
+  (( $# >= 2 )) && (( ${_WT_AGENTS[(Ie)$1]} )) || { print -u2 $usage; return 2; }
+  local agent=$1; shift
+  _wt_parse wt "$@" && _wt_switch_args wt || return
+  _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${_wt_args[@]}"
+}
+
+# wth [agent] <branch> ... — open in herdr, optionally starting the agent.
+wth() {
+  local usage='usage: wth [claude|codex|pi] <branch> [--base <ref>] [args...]'
+  local agent=''
+  if (( $# >= 1 )) && (( ${_WT_AGENTS[(Ie)$1]} )); then agent=$1; shift; fi
+  (( $# >= 1 )) || { print -u2 $usage; return 2; }
+  (( $+commands[herdr] )) || { print -u2 'wth: herdr not found'; return 1; }
+  (( $+commands[jq] ))    || { print -u2 'wth: jq not found'; return 1; }
+  _wt_parse wth "$@" && _wt_switch_args wth || return
+  if [[ -z $agent ]] && (( $#_wt_args )); then
+    print -u2 "wth: unexpected arguments without an agent: ${_wt_args[*]}"; return 2
+  fi
+
+  # 1. Worktrunk: create/reuse the worktree (runs pre-start hooks).
+  local out wtpath root
+  out=$(command wt switch "${_wt_switch[@]}" --no-cd --yes --format json) || return
+  wtpath=$(print -r -- "$out" | jq -r '.path // empty')
+  [[ -d $wtpath ]] || { print -u2 'wth: worktrunk returned no path'; return 1; }
+
+  # 2. herdr: open the checkout as a workspace. herdr requires the request to
+  #    come from the primary checkout (the repo's parent workspace).
+  root=$(command git -C "$wtpath" worktree list --porcelain | sed -n '1s/^worktree //p')
+  out=$(herdr worktree open --cwd "$root" --path "$wtpath" --focus) || return
+  print "opened $_wt_branch in herdr ($wtpath)"
+  [[ -n $agent ]] || return 0
+
+  # 3. Start the agent: in the root pane of a fresh workspace, or in a new tab
+  #    if the workspace was already open (its panes may be busy).
+  local pane ws
+  if [[ $(print -r -- "$out" | jq -r '.result.already_open') == true ]]; then
+    ws=$(print -r -- "$out" | jq -r '.result.workspace.workspace_id')
+    out=$(herdr tab create --workspace "$ws" --cwd "$wtpath" --label "$agent" --focus) || return
+    pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // .result.pane.pane_id // empty')
+  else
+    pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // empty')
+  fi
+  [[ -n $pane ]] || { print -u2 'wth: could not find a herdr pane to run the agent in'; return 1; }
+  local -a cmd=("$agent" "${_wt_args[@]}")
+  herdr pane run "$pane" "${(j: :)${(q-)cmd[@]}}" >/dev/null &&
+    print "started $agent in $pane"
+}
+
+# Keep Worktrunk's wrapper (directory switching, dynamic completion) for all
+# normal subcommands; route agent names to wt-cmd.
+functions -c wt _wt_worktrunk
+wt() {
+  if (( ${_WT_AGENTS[(Ie)${1-}]} )); then wt-cmd "$@"; else _wt_worktrunk "$@"; fi
+}
+
+# --- completion ----------------------------------------------------------------
+# Worktrunk's own `switch` completion includes branches that are not linked
+# worktrees. Agent commands complete only active worktrees (plus local branches
+# for wth, which is also used to create new workspaces).
+_wt_active_worktree_names() {
+  local line
+  while IFS= read -r line; do
+    [[ $line == 'branch refs/heads/'* ]] && print -r -- "${line#branch refs/heads/}"
+  done < <(command git worktree list --porcelain 2>/dev/null)
+}
+_wt_complete_active_worktree() {
+  local -a worktrees=("${(@f)$(_wt_active_worktree_names)}")
+  (( $#worktrees )) && _describe -t worktrees 'active worktree' worktrees
+}
+_wt_complete_local_branch() {
+  local -a branches=("${(@f)$(command git for-each-ref --format='%(refname:short)' refs/heads 2>/dev/null)}")
+  (( $#branches )) && _describe -t branches 'local branch' branches
+}
+_wt_complete() {
+  if (( CURRENT == 2 )); then
+    _wt_lazy_complete "$@"
+    _describe -t agents agent _WT_AGENTS
+  elif (( CURRENT == 3 )) && (( ${_WT_AGENTS[(Ie)${words[2]}]} )); then
+    _wt_complete_active_worktree
+  elif (( CURRENT == 4 )) && (( ${_WT_AGENTS[(Ie)${words[2]}]} )) && [[ ${words[3]} == --base ]]; then
+    _wt_complete_local_branch
+  else
+    _wt_lazy_complete "$@"
+  fi
+}
+_wth_complete() {
+  local i=2
+  (( ${_WT_AGENTS[(Ie)${words[2]}]} )) && i=3
+  if (( CURRENT == 2 )); then
+    _describe -t agents agent _WT_AGENTS
+    _wt_complete_local_branch
+  elif (( CURRENT == i )); then
+    _wt_complete_local_branch
+  elif [[ ${words[CURRENT-1]} == --base ]]; then
+    _wt_complete_local_branch
+  fi
+}
+compdef _wt_complete wt
+compdef _wth_complete wth
