@@ -206,7 +206,10 @@ function gh() {
 
 alias env_priv="env | cut -d= -f1"
 
-ssh-add -q --apple-use-keychain $HOME/.ssh/id_ed25519_github
+# Only load this key when an SSH agent is available (not on inbound SSH logins).
+if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "$SSH_AUTH_SOCK" ]; then
+  ssh-add -q --apple-use-keychain "$HOME/.ssh/id_ed25519_github"
+fi
 
 
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"

@@ -218,6 +218,12 @@ eval "$(oh-my-posh init zsh --config "$HOME/.oh-my-zsh/p10k.omp.json")"
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
-# GitHub MCP server auth (reuses gh CLI keyring token)
-export GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token)
+# GitHub MCP server auth (reuses the GitHub CLI keyring token when available).
+# Don't emit an error on SSH sessions where the CLI has no OAuth token.
+if github_token="$(command gh auth token 2>/dev/null)" && [[ -n $github_token ]]; then
+  export GITHUB_PERSONAL_ACCESS_TOKEN="$github_token"
+else
+  unset GITHUB_PERSONAL_ACCESS_TOKEN
+fi
+unset github_token
 
