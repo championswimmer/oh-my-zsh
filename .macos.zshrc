@@ -139,8 +139,8 @@ bindkey "$terminfo[kRIT]" forward-word
 
 
 # ZSH LLM Assist Configuration
-export ZSH_LLM_CLI_TOOL="gemini" # copilot, gemini, claude, codex
-export ZSH_LLM_CLI_MODEL="gemini-3-flash"
+export ZSH_LLM_CLI_TOOL="antigravity" # copilot, gemini, claude, codex, antigravity, grok-build, opencode
+export ZSH_LLM_ANTIGRAVITY_MODEL="gemini-3.8-flash-low"
 # export ZSH_LLM_CLI_DEBUG=true
 bindkey '^_' llm_explain # bind Option+? to explain
 bindkey '^@' llm_suggest # bind Option+Space to suggest
