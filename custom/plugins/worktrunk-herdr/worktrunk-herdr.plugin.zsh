@@ -58,7 +58,10 @@ wt-cmd() {
   (( $# >= 2 )) && (( ${_WT_AGENTS[(Ie)$1]} )) || { print -u2 $usage; return 2; }
   local agent=$1; shift
   _wt_parse wt "$@" && _wt_switch_args wt || return
-  _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${_wt_args[@]}"
+  # --execute bypasses shell functions, so add herdr scrollback flags here.
+  local -a reply=()
+  (( $+functions[_herdr_scrollback_flags] )) && _herdr_scrollback_flags "$agent" "${_wt_args[@]}"
+  _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${reply[@]}" "${_wt_args[@]}"
 }
 
 # wth [agent] <branch> ... — open in herdr, optionally starting the agent.
