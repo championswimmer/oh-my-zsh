@@ -2,9 +2,10 @@
 #
 #   wt  <claude|codex|pi> <branch> [--base <ref>] [agent args...]
 #       Create/reuse a Worktrunk worktree and run the agent in THIS terminal.
-#   wth [<claude|codex|pi>] <branch> [--base <ref>] [agent args...]
-#       Create/reuse a Worktrunk worktree, open it as a herdr workspace and
-#       (optionally) start the agent there. This terminal stays where it is.
+#   wth [<claude|codex|pi>] <branch> [--base <ref>] [--space <name>] [agent args...]
+#       Create/reuse a Worktrunk worktree, open it in a new herdr space (named
+#       with --space/-s when supplied), and optionally start the agent there.
+#       This terminal stays where it is.
 #
 # Worktrunk runs the project's pre-start hooks in both cases. Everything after
 # a literal `--` is passed to the agent untouched (so it can get its own --base).
@@ -64,42 +65,71 @@ wt-cmd() {
   _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${reply[@]}" "${_wt_args[@]}"
 }
 
-# wth [agent] <branch> ... — open in herdr, optionally starting the agent.
+# Parse wth's worktree options plus its herdr-space option.  A space is always
+# created; --space only supplies its display name.
+_wth_parse() {
+  local caller=$1; shift
+  typeset -g _wt_branch=$1 _wt_base='' _wth_space=''
+  typeset -ga _wt_args=()
+  shift
+  while (( $# )); do
+    case $1 in
+      --base)
+        (( $# >= 2 )) || { print -u2 "$caller: --base requires a branch"; return 2; }
+        _wt_base=$2; shift 2 ;;
+      --base=*)
+        _wt_base=${1#--base=}
+        [[ -n $_wt_base ]] || { print -u2 "$caller: --base requires a branch"; return 2; }
+        shift ;;
+      -s|--space)
+        (( $# >= 2 )) || { print -u2 "$caller: $1 requires a space name"; return 2; }
+        _wth_space=$2; shift 2 ;;
+      --space=*)
+        _wth_space=${1#--space=}
+        [[ -n $_wth_space ]] || { print -u2 "$caller: --space requires a space name"; return 2; }
+        shift ;;
+      --) shift; _wt_args+=("$@"); break ;;
+      *)  _wt_args+=("$1"); shift ;;
+    esac
+  done
+}
+
+# wth [agent] <branch> ... — open in a new herdr space, optionally starting
+# the agent.  The space is unnamed unless --space/-s is supplied.
 wth() {
-  local usage='usage: wth [claude|codex|pi] <branch> [--base <ref>] [args...]'
+  local usage='usage: wth [claude|codex|pi] <branch> [--base <ref>] [--space <name>] [args...]'
   local agent=''
   if (( $# >= 1 )) && (( ${_WT_AGENTS[(Ie)$1]} )); then agent=$1; shift; fi
   (( $# >= 1 )) || { print -u2 $usage; return 2; }
   (( $+commands[herdr] )) || { print -u2 'wth: herdr not found'; return 1; }
   (( $+commands[jq] ))    || { print -u2 'wth: jq not found'; return 1; }
-  _wt_parse wth "$@" && _wt_switch_args wth || return
+  _wth_parse wth "$@" && _wt_switch_args wth || return
   if [[ -z $agent ]] && (( $#_wt_args )); then
     print -u2 "wth: unexpected arguments without an agent: ${_wt_args[*]}"; return 2
   fi
 
   # 1. Worktrunk: create/reuse the worktree (runs pre-start hooks).
-  local out wtpath root
+  local out wtpath root ws pane
   out=$(command wt switch "${_wt_switch[@]}" --no-cd --yes --format json) || return
   wtpath=$(print -r -- "$out" | jq -r '.path // empty')
   [[ -d $wtpath ]] || { print -u2 'wth: worktrunk returned no path'; return 1; }
 
-  # 2. herdr: open the checkout as a workspace. herdr requires the request to
-  #    come from the primary checkout (the repo's parent workspace).
+  # 2. Make a fresh herdr space, then open the checkout in it.  Specifying a
+  #    workspace prevents Herdr from reusing a space where this worktree is
+  #    already open.
+  local -a space_args=()
+  [[ -n $_wth_space ]] && space_args=(--label "$_wth_space")
+  out=$(herdr workspace create "${space_args[@]}" --focus) || return
+  ws=$(print -r -- "$out" | jq -r '.result.workspace.workspace_id // .result.workspace_id // empty')
+  [[ -n $ws ]] || { print -u2 'wth: could not find the new herdr space'; return 1; }
   root=$(command git -C "$wtpath" worktree list --porcelain | sed -n '1s/^worktree //p')
-  out=$(herdr worktree open --cwd "$root" --path "$wtpath" --focus) || return
-  print "opened $_wt_branch in herdr ($wtpath)"
+  out=$(herdr worktree open --workspace "$ws" --cwd "$root" --path "$wtpath" --focus) || return
+  print "opened $_wt_branch in new herdr space${_wth_space:+ ($_wth_space)} ($wtpath)"
   [[ -n $agent ]] || return 0
 
-  # 3. Start the agent: in the root pane of a fresh workspace, or in a new tab
-  #    if the workspace was already open (its panes may be busy).
-  local pane ws
-  if [[ $(print -r -- "$out" | jq -r '.result.already_open') == true ]]; then
-    ws=$(print -r -- "$out" | jq -r '.result.workspace.workspace_id')
-    out=$(herdr tab create --workspace "$ws" --cwd "$wtpath" --label "$agent" --focus) || return
-    pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // .result.pane.pane_id // empty')
-  else
-    pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // empty')
-  fi
+  # 3. The worktree opens in a fresh tab in the new space; start the agent in
+  #    that tab's root pane.
+  pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // .result.pane.pane_id // empty')
   [[ -n $pane ]] || { print -u2 'wth: could not find a herdr pane to run the agent in'; return 1; }
   local -a cmd=("$agent" "${_wt_args[@]}")
   herdr pane run "$pane" "${(j: :)${(q-)cmd[@]}}" >/dev/null &&
@@ -153,6 +183,10 @@ _wth_complete() {
     _wt_complete_local_branch
   elif [[ ${words[CURRENT-1]} == --base ]]; then
     _wt_complete_local_branch
+  elif [[ ${words[CURRENT-1]} == (-s|--space) ]]; then
+    _message 'new herdr space name'
+  elif (( CURRENT > i )); then
+    _describe -t options option '--base[base branch]:branch' '--space=[new herdr space name]:space name' '-s[new herdr space name]:space name'
   fi
 }
 compdef _wt_complete wt
