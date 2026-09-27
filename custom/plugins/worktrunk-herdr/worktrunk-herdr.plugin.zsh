@@ -99,6 +99,13 @@ _wth_parse() {
 # wth [agent] <branch> ... — open in a new herdr space, optionally starting
 # the agent.  The space is unnamed unless --space/-s is supplied.
 wth() {
+  if [[ ${1-} == (-h|--help) ]]; then
+    print -r -- 'wth — open a branch in a NEW herdr space (this terminal stays put)
+  wth [agent] <branch> [--base <ref>] [--space <name>] [-- agent args]
+  space name: --space/-s, else last /-segment of the branch
+  agents: claude codex pi'
+    return 0
+  fi
   local usage='usage: wth [claude|codex|pi] <branch> [--base <ref>] [--space <name>] [args...]'
   local agent=''
   if (( $# >= 1 )) && (( ${_WT_AGENTS[(Ie)$1]} )); then agent=$1; shift; fi
@@ -143,6 +150,14 @@ wth() {
 # normal subcommands; route agent names to wt-cmd.
 functions -c wt _wt_worktrunk
 wt() {
+  # -h: concise wrapper help; --help still reaches Worktrunk itself.
+  if [[ ${1-} == -h ]]; then
+    print -r -- 'wt — run an agent in a worktree, in THIS terminal
+  wt <agent> <branch> [--base <ref>] [-- agent args]
+  agents: claude codex pi
+  anything else (incl. --help) goes to worktrunk itself'
+    return 0
+  fi
   if (( ${_WT_AGENTS[(Ie)${1-}]} )); then wt-cmd "$@"; else _wt_worktrunk "$@"; fi
 }
 
