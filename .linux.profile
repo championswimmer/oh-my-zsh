@@ -100,8 +100,9 @@ alias env_priv="env | cut -d= -f1"
 
 # [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-# ---- SSH agent: one per login session ----
-if [ -z "$SSH_AUTH_SOCK" ]; then
+# ---- SSH agent: one per local login session ----
+# Do not launch a disposable agent for an inbound SSH login.
+if [ -z "${SSH_AUTH_SOCK:-}" ] && [ -z "${SSH_CONNECTION:-}" ]; then
     eval "$(ssh-agent -s)" >/dev/null
 fi
 
