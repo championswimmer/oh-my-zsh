@@ -4,7 +4,8 @@
 #       Create/reuse a Worktrunk worktree and run the agent in THIS terminal.
 #   wth [<claude|codex|pi>] <branch> [--base <ref>] [--space <name>] [agent args...]
 #       Create/reuse a Worktrunk worktree, open it in a new herdr space (named
-#       with --space/-s when supplied), and optionally start the agent there.
+#       with --space/-s, else the branch's last '/'-separated segment), and
+#       optionally start the agent there.
 #       This terminal stays where it is.
 #
 # Worktrunk runs the project's pre-start hooks in both cases. Everything after
@@ -66,7 +67,8 @@ wt-cmd() {
 }
 
 # Parse wth's worktree options plus its herdr-space option.  A space is always
-# created; --space only supplies its display name.
+# created; --space overrides the default name (the branch's last '/'-separated
+# segment).
 _wth_parse() {
   local caller=$1; shift
   typeset -g _wt_branch=$1 _wt_base='' _wth_space=''
@@ -107,6 +109,8 @@ wth() {
   if [[ -z $agent ]] && (( $#_wt_args )); then
     print -u2 "wth: unexpected arguments without an agent: ${_wt_args[*]}"; return 2
   fi
+  # Default space name: last '/'-separated segment of the branch.
+  [[ -n $_wth_space ]] || _wth_space=${_wt_branch##*/}
 
   # 1. Worktrunk: create/reuse the worktree (runs pre-start hooks).
   local out wtpath root ws pane
@@ -117,8 +121,7 @@ wth() {
   # 2. Make a fresh herdr space, then open the checkout in it.  Specifying a
   #    workspace prevents Herdr from reusing a space where this worktree is
   #    already open.
-  local -a space_args=()
-  [[ -n $_wth_space ]] && space_args=(--label "$_wth_space")
+  local -a space_args=(--label "$_wth_space")
   out=$(herdr workspace create "${space_args[@]}" --focus) || return
   ws=$(print -r -- "$out" | jq -r '.result.workspace.workspace_id // .result.workspace_id // empty')
   [[ -n $ws ]] || { print -u2 'wth: could not find the new herdr space'; return 1; }
