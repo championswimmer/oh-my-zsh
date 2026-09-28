@@ -3,10 +3,13 @@
 #   wt  <claude|codex|pi> <branch> [--base <ref>] [agent args...]
 #       Create/reuse a Worktrunk worktree and run the agent in THIS terminal.
 #   wth [<claude|codex|pi>] <branch> [--base <ref>] [--space <name>] [agent args...]
-#       Create/reuse a Worktrunk worktree, open it in a new herdr space (named
+#       Create/reuse a Worktrunk worktree, open or reuse its herdr space (named
 #       with --space/-s, else the branch's last '/'-separated segment), and
 #       optionally start the agent there.
 #       This terminal stays where it is.
+#   wh  [<claude|codex|pi>] <space> [agent args...]
+#       Create a standalone herdr workspace (or use --space <name>) and
+#       optionally start the agent there.
 #
 # Worktrunk runs the project's pre-start hooks in both cases. Everything after
 # a literal `--` is passed to the agent untouched (so it can get its own --base).
@@ -66,9 +69,8 @@ wt-cmd() {
   _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${reply[@]}" "${_wt_args[@]}"
 }
 
-# Parse wth's worktree options plus its herdr-space option.  A space is always
-# created; --space overrides the default name (the branch's last '/'-separated
-# segment).
+# Parse wth's worktree options plus its herdr-space option. --space overrides
+# the default name (the branch's last '/'-separated segment).
 _wth_parse() {
   local caller=$1; shift
   typeset -g _wt_branch=$1 _wt_base='' _wth_space=''
@@ -96,11 +98,26 @@ _wth_parse() {
   done
 }
 
-# wth [agent] <branch> ... — open in a new herdr space, optionally starting
-# the agent.  The space is unnamed unless --space/-s is supplied.
+# Start an agent in a Herdr pane with the same scrollback-safe mode that its
+# shell wrapper would use. This is needed because `herdr pane run` bypasses
+# shell functions when the target shell has not finished loading them yet.
+_herdr_run_agent() {
+  local pane=$1 agent=$2; shift 2
+  local -a reply=() cmd=()
+  (( $+functions[_herdr_scrollback_flags] )) && _herdr_scrollback_flags "$agent" "$@"
+  case $agent in
+    claude) cmd=(env CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 "$agent" "${reply[@]}" "$@") ;;
+    *)      cmd=("$agent" "${reply[@]}" "$@") ;;
+  esac
+  herdr pane run "$pane" "${(j: :)${(q-)cmd[@]}}" >/dev/null || return
+  print "started $agent in $pane"
+}
+
+# wth [agent] <branch> ... — open or reuse the worktree's herdr space,
+# optionally starting the agent there.
 wth() {
   if [[ ${1-} == (-h|--help) ]]; then
-    print -r -- 'wth — open a branch in a NEW herdr space (this terminal stays put)
+    print -r -- 'wth — open a branch in its herdr space (this terminal stays put)
   wth [agent] <branch> [--base <ref>] [--space <name>] [-- agent args]
   space name: --space/-s, else last /-segment of the branch
   agents: claude codex pi'
@@ -120,30 +137,91 @@ wth() {
   [[ -n $_wth_space ]] || _wth_space=${_wt_branch##*/}
 
   # 1. Worktrunk: create/reuse the worktree (runs pre-start hooks).
-  local out wtpath root ws pane
+  local out wtpath root pane already_open
   out=$(command wt switch "${_wt_switch[@]}" --no-cd --yes --format json) || return
   wtpath=$(print -r -- "$out" | jq -r '.path // empty')
   [[ -d $wtpath ]] || { print -u2 'wth: worktrunk returned no path'; return 1; }
 
-  # 2. Make a fresh herdr space, then open the checkout in it.  Specifying a
-  #    workspace prevents Herdr from reusing a space where this worktree is
-  #    already open.
-  local -a space_args=(--label "$_wth_space")
-  out=$(herdr workspace create "${space_args[@]}" --focus) || return
-  ws=$(print -r -- "$out" | jq -r '.result.workspace.workspace_id // .result.workspace_id // empty')
-  [[ -n $ws ]] || { print -u2 'wth: could not find the new herdr space'; return 1; }
+  # 2. Herdr creates a worktree space with its shell in the checkout, or
+  #    focuses the existing space. Do not pre-create a workspace: worktree open
+  #    creates its own, leaving a pre-created workspace empty.
   root=$(command git -C "$wtpath" worktree list --porcelain | sed -n '1s/^worktree //p')
-  out=$(herdr worktree open --workspace "$ws" --cwd "$root" --path "$wtpath" --focus) || return
-  print "opened $_wt_branch in new herdr space${_wth_space:+ ($_wth_space)} ($wtpath)"
+  [[ -d $root ]] || { print -u2 'wth: could not find the repository root'; return 1; }
+  out=$(herdr worktree open --cwd "$root" --path "$wtpath" --label "$_wth_space" --focus) || return
+  already_open=$(print -r -- "$out" | jq -r '.result.already_open // false')
+  if [[ $already_open == true ]]; then
+    print "focused $_wt_branch in herdr space ($_wth_space) ($wtpath)"
+  else
+    print "opened $_wt_branch in new herdr space ($_wth_space) ($wtpath)"
+  fi
   [[ -n $agent ]] || return 0
 
-  # 3. The worktree opens in a fresh tab in the new space; start the agent in
-  #    that tab's root pane.
+  # 3. Start the agent in the worktree space's root pane.
   pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // .result.pane.pane_id // empty')
   [[ -n $pane ]] || { print -u2 'wth: could not find a herdr pane to run the agent in'; return 1; }
-  local -a cmd=("$agent" "${_wt_args[@]}")
-  herdr pane run "$pane" "${(j: :)${(q-)cmd[@]}}" >/dev/null &&
-    print "started $agent in $pane"
+  _herdr_run_agent "$pane" "$agent" "${_wt_args[@]}"
+}
+
+# Parse wh's standalone herdr-space option. The first positional argument is
+# the space name; --space/-s is its explicit alternative. Remaining arguments
+# belong to the optional agent.
+_wh_parse() {
+  local caller=$1; shift
+  typeset -g _wh_space=''
+  typeset -ga _wt_args=()
+  local positional_space='' named_space=''
+  while (( $# )); do
+    case $1 in
+      -s|--space)
+        (( $# >= 2 )) || { print -u2 "$caller: $1 requires a space name"; return 2; }
+        named_space=$2; shift 2 ;;
+      --space=*)
+        named_space=${1#--space=}
+        [[ -n $named_space ]] || { print -u2 "$caller: --space requires a space name"; return 2; }
+        shift ;;
+      --) shift; _wt_args+=("$@"); break ;;
+      *)
+        if [[ -z $named_space && -z $positional_space ]]; then positional_space=$1
+        else _wt_args+=("$1")
+        fi
+        shift ;;
+    esac
+  done
+  if [[ -n $positional_space && -n $named_space ]]; then
+    print -u2 "$caller: use either a space name or --space, not both"; return 2
+  fi
+  _wh_space=${named_space:-$positional_space}
+  [[ -n $_wh_space ]] || { print -u2 "$caller: a space name is required"; return 2; }
+}
+
+# wh [agent] <space> ... — create a standalone herdr workspace and optionally
+# start the agent in its root pane. The workspace opens at the current directory.
+wh() {
+  if [[ ${1-} == (-h|--help) ]]; then
+    print -r -- 'wh — open a standalone herdr workspace (this terminal stays put)
+  wh [agent] <space> [-- agent args]
+  wh [agent] --space <name> [-- agent args]
+  agents: claude codex pi'
+    return 0
+  fi
+  local usage='usage: wh [claude|codex|pi] <space> [--space <name>] [args...]'
+  local agent=''
+  if (( $# >= 1 )) && (( ${_WT_AGENTS[(Ie)$1]} )); then agent=$1; shift; fi
+  (( $# >= 1 )) || { print -u2 $usage; return 2; }
+  (( $+commands[herdr] )) || { print -u2 'wh: herdr not found'; return 1; }
+  (( $+commands[jq] ))    || { print -u2 'wh: jq not found'; return 1; }
+  _wh_parse wh "$@" || return
+  if [[ -z $agent ]] && (( $#_wt_args )); then
+    print -u2 "wh: unexpected arguments without an agent: ${_wt_args[*]}"; return 2
+  fi
+
+  local out pane
+  out=$(herdr workspace create --cwd "$PWD" --label "$_wh_space" --focus) || return
+  pane=$(print -r -- "$out" | jq -r '.result.root_pane.pane_id // empty')
+  [[ -n $pane ]] || { print -u2 'wh: could not find the new herdr workspace root pane'; return 1; }
+  print "opened new herdr space ($_wh_space) ($PWD)"
+  [[ -n $agent ]] || return 0
+  _herdr_run_agent "$pane" "$agent" "${_wt_args[@]}"
 }
 
 # Keep Worktrunk's wrapper (directory switching, dynamic completion) for all
@@ -207,5 +285,18 @@ _wth_complete() {
     _describe -t options option '--base[base branch]:branch' '--space=[new herdr space name]:space name' '-s[new herdr space name]:space name'
   fi
 }
+_wh_complete() {
+  if (( CURRENT == 2 )); then
+    _describe -t agents agent _WT_AGENTS
+    _message 'new herdr space name'
+  elif (( CURRENT == 3 )) && (( ${_WT_AGENTS[(Ie)${words[2]}]} )); then
+    _message 'new herdr space name'
+  elif [[ ${words[CURRENT-1]} == (-s|--space) ]]; then
+    _message 'new herdr space name'
+  else
+    _describe -t options option '--space=[new herdr space name]:space name' '-s[new herdr space name]:space name'
+  fi
+}
 compdef _wt_complete wt
 compdef _wth_complete wth
+compdef _wh_complete wh
