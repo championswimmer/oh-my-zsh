@@ -18,7 +18,30 @@
 
 eval "$(command wt config shell init zsh)"
 
+# 1: use scrollback-compatible agent UIs; 0: leave UI settings untouched.
+# Set before loading the plugin, or change it at runtime.
+: ${HERDR_USE_TUI_COMPAT_CODING_AGENT:=1}
+
 typeset -ga _WT_AGENTS=(claude codex pi)
+
+# Return compatibility flags in the caller's reply array. Explicit UI flags win.
+_herdr_scrollback_flags() {
+  local agent=$1; shift
+  reply=()
+  [[ ${HERDR_USE_TUI_COMPAT_CODING_AGENT-0} == 1 ]] || return 0
+  case $agent in
+    codex)
+      (( ${@[(Ie)--no-alt-screen]} )) || reply=(--no-alt-screen) ;;
+    pi)
+      local arg
+      for arg in "$@"; do
+        [[ $arg == --tui-mode || $arg == --tui-mode=* ]] && return 0
+        [[ $arg == -- ]] && break
+      done
+      reply=(--tui-mode regular) ;;
+  esac
+  return 0
+}
 
 # Parse `<branch> [--base <ref>] [args...]`.
 # Sets: _wt_branch, _wt_base, _wt_args (array). $1 is the caller name for errors.
@@ -63,9 +86,12 @@ wt-cmd() {
   (( $# >= 2 )) && (( ${_WT_AGENTS[(Ie)$1]} )) || { print -u2 $usage; return 2; }
   local agent=$1; shift
   _wt_parse wt "$@" && _wt_switch_args wt || return
-  # --execute bypasses shell functions, so add herdr scrollback flags here.
+  # --execute bypasses shell functions, so apply compatibility here too.
   local -a reply=()
-  (( $+functions[_herdr_scrollback_flags] )) && _herdr_scrollback_flags "$agent" "${_wt_args[@]}"
+  _herdr_scrollback_flags "$agent" "${_wt_args[@]}"
+  if [[ ${HERDR_USE_TUI_COMPAT_CODING_AGENT-0} == 1 && $agent == claude ]]; then
+    local -x CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
+  fi
   _wt_worktrunk switch "${_wt_switch[@]}" --execute "$agent" -- "${reply[@]}" "${_wt_args[@]}"
 }
 
@@ -98,17 +124,15 @@ _wth_parse() {
   done
 }
 
-# Start an agent in a Herdr pane with the same scrollback-safe mode that its
-# shell wrapper would use. This is needed because `herdr pane run` bypasses
-# shell functions when the target shell has not finished loading them yet.
+# Start an agent in a Herdr pane, applying compatibility only when enabled.
 _herdr_run_agent() {
   local pane=$1 agent=$2; shift 2
   local -a reply=() cmd=()
-  (( $+functions[_herdr_scrollback_flags] )) && _herdr_scrollback_flags "$agent" "$@"
-  case $agent in
-    claude) cmd=(env CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 "$agent" "${reply[@]}" "$@") ;;
-    *)      cmd=("$agent" "${reply[@]}" "$@") ;;
-  esac
+  _herdr_scrollback_flags "$agent" "$@"
+  cmd=("$agent" "${reply[@]}" "$@")
+  if [[ ${HERDR_USE_TUI_COMPAT_CODING_AGENT-0} == 1 && $agent == claude ]]; then
+    cmd=(env CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 "${cmd[@]}")
+  fi
   herdr pane run "$pane" "${(j: :)${(q-)cmd[@]}}" >/dev/null || return
   print "started $agent in $pane"
 }
