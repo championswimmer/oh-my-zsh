@@ -4,7 +4,7 @@
 # Usage:
 #   git clone --recurse-submodules <this-repo-url> ~/.oh-my-zsh
 #   ~/.oh-my-zsh/install.sh
-#   ~/.oh-my-zsh/install.sh --update      # git pull + re-apply to $HOME (idempotent)
+#   ~/.oh-my-zsh/install.sh --update      # git pull + submodules to latest upstream + re-apply to $HOME (idempotent)
 #   ~/.oh-my-zsh/install.sh --uninstall   # reverse it
 #
 # Options: --yes (no prompts, accept AI merge), --tool=claude|codex|pi|none.
@@ -97,7 +97,12 @@ if ! $UNINSTALL; then
 
   if [[ -d .git ]]; then
     echo "Initializing/updating git submodules (plugins + powerlevel10k)..."
-    :
+    git submodule update --init --recursive
+    if $UPDATE; then
+      echo "Fetching latest upstream commits for submodules (--update)..."
+      git submodule update --init --recursive --remote --jobs 4 \
+        || echo "warning: some submodules could not be advanced to their latest upstream; kept at the pinned commit."
+    fi
   else
     echo "warning: $OMZ_DIR is not a git repo; skipping submodule init. Plugins under custom/plugins may be missing/empty."
   fi
