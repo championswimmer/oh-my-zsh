@@ -184,13 +184,6 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
 alias hs="npx live-server"
 
-alias gh_cli=$(which gh)
-
-function gh() {
-  unset GITHUB_TOKEN
-  gh_cli $@
-}
-
 alias env_priv="env | cut -d= -f1"
 
 # Only load this key when an SSH agent is available (not on inbound SSH logins).
