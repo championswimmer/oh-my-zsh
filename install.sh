@@ -100,7 +100,8 @@ if ! $UNINSTALL; then
     git submodule update --init --recursive
     if $UPDATE; then
       echo "Fetching latest upstream commits for submodules (--update)..."
-      git submodule update --init --recursive --remote --jobs 4 \
+      git submodule update --init --remote --jobs 4 \
+        && git submodule update --init --recursive \
         || echo "warning: some submodules could not be advanced to their latest upstream; kept at the pinned commit."
     fi
   else
