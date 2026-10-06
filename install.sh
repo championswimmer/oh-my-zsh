@@ -11,8 +11,9 @@
 #
 # Re-running is idempotent: files already identical to the repo are skipped.
 # For changed files a 3-way merge (git merge-file) is used: the "base" is the
-# repo version installed last time (kept in ~/.oh-my-zsh-install-base, or the
-# pre-pull git commit on --update), so lines REMOVED upstream are removed locally
+# repo version installed last time (kept in ~/.oh-my-zsh-install-base; else the
+# repo as of the newest <dest>.bak.<timestamp>, i.e. all commits since the last
+# backup are applied; else the pre-pull commit on --update), so lines REMOVED upstream are removed locally
 # while machine-local additions (secrets, PATH tweaks) are kept. Only real
 # conflicts go to the AI tool; if that is unavailable
 # the new repo version is applied plus your local-only added lines (nothing the
@@ -238,6 +239,12 @@ append_fallback() {
   echo "  !! Please review $dest by hand: your old config is above, the new one below, and there may be duplicate/conflicting settings."
 }
 
+# bak_epoch YYYYmmddHHMMSS -> epoch seconds (GNU and BSD date)
+bak_epoch() {
+  date -d "${1:0:4}-${1:4:2}-${1:6:2} ${1:8:2}:${1:10:2}:${1:12:2}" +%s 2>/dev/null \
+    || date -j -f %Y%m%d%H%M%S "$1" +%s 2>/dev/null || true
+}
+
 save_base() { mkdir -p "$BASE_DIR"; cp "$1" "$BASE_DIR/$(basename "$2")"; }
 
 # apply_result NEW_CONTENT DEST BACKUP LABEL HOWTO
@@ -273,14 +280,41 @@ install_dotfile() {
     return
   fi
 
-  # Find the base: repo version installed last time, else the pre-pull commit.
-  local base="" tmpbase=""
+  # Find the base (the repo version this machine's file was last in sync with):
+  #   1. repo version recorded at last install (~/.oh-my-zsh-install-base)
+  #   2. repo version as of the newest <dest>.bak.<timestamp> (git history)
+  #   3. repo version before this --update's pull
+  local base="" tmpbase="" base_commit="" base_how=""
   if [[ -f "$BASE_DIR/$name" ]]; then
-    base="$BASE_DIR/$name"
-  elif [[ -n "${OMZ_OLD_HEAD:-}" ]]; then
-    tmpbase="$(mktemp)"
-    if git -C "$OMZ_DIR" show "$OMZ_OLD_HEAD:$name" > "$tmpbase" 2>/dev/null; then base="$tmpbase"
-    else rm -f "$tmpbase"; tmpbase=""; fi
+    base="$BASE_DIR/$name"; base_how="last installed version"
+  else
+    local lastbak epoch
+    lastbak="$(ls -1 "$dest".bak.* 2>/dev/null | grep -E '\.bak\.[0-9]{14}$' | sort | tail -1 || true)"
+    if [[ -n "$lastbak" ]]; then
+      epoch="$(bak_epoch "${lastbak##*.bak.}")"
+      [[ -z "$epoch" ]] || base_commit="$(git -C "$OMZ_DIR" rev-list -1 --before="$epoch" HEAD -- "$name" 2>/dev/null || true)"
+      [[ -z "$base_commit" ]] || base_how="repo as of last backup (${lastbak##*.bak.})"
+    fi
+    if [[ -z "$base_commit" && -n "${OMZ_OLD_HEAD:-}" ]]; then
+      base_commit="$OMZ_OLD_HEAD"; base_how="repo before this update"
+    fi
+    if [[ -n "$base_commit" ]]; then
+      tmpbase="$(mktemp)"
+      if git -C "$OMZ_DIR" show "$base_commit:$name" > "$tmpbase" 2>/dev/null; then base="$tmpbase"
+      else rm -f "$tmpbase"; tmpbase=""; base_commit=""; fi
+    fi
+  fi
+
+  # Repo commits touching this file since the base (shown + given to the AI as context).
+  local history=""
+  if [[ -n "$base_commit" ]]; then
+    history="$(git -C "$OMZ_DIR" log --format='%h %ad %s' --date=short "$base_commit..HEAD" -- "$name" 2>/dev/null || true)"
+  fi
+  if [[ -n "$base" ]]; then
+    echo "  Base for $label: $base_how."
+    if [[ -n "$history" ]]; then
+      echo "  Repo commits to apply since then:"; echo "$history" | sed 's/^/    /'
+    fi
   fi
 
   # Repo version unchanged since last install: local file is just customized.
@@ -309,7 +343,10 @@ install_dotfile() {
     elif (( rc > 0 )); then
       echo "  3-way merge of $label has $rc conflict(s)."
       local prompt="Resolve the git merge conflicts in this shell config file ($dest). The sections between <<<<<<< and >>>>>>> show the LOCAL machine version and the NEW repo version. Prefer the NEW repo version on genuine conflicts, but keep machine-local additions (exports, secrets, PATH entries). Anything the new repo version deliberately removed must stay removed. Output ONLY the final raw file, no explanation, no markdown fences, no conflict markers.
-
+${history:+
+Repo commits applied since the local file was last in sync (for context):
+$history
+}
 $(cat "$out")"
       local res; res="$(mktemp)"
       if ai_merge "$prompt" "$res"; then
