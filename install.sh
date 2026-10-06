@@ -4,7 +4,19 @@
 # Usage:
 #   git clone --recurse-submodules <this-repo-url> ~/.oh-my-zsh
 #   ~/.oh-my-zsh/install.sh
+#   ~/.oh-my-zsh/install.sh --update      # git pull + re-apply to $HOME (idempotent)
 #   ~/.oh-my-zsh/install.sh --uninstall   # reverse it
+#
+# Options: --yes (no prompts, accept AI merge), --tool=claude|codex|pi|none.
+#
+# Re-running is idempotent: files already identical to the repo are skipped.
+# For changed files a 3-way merge (git merge-file) is used: the "base" is the
+# repo version installed last time (kept in ~/.oh-my-zsh-install-base, or the
+# pre-pull git commit on --update), so lines REMOVED upstream are removed locally
+# while machine-local additions (secrets, PATH tweaks) are kept. Only real
+# conflicts go to the AI tool; if that is unavailable
+# the new repo version is applied plus your local-only added lines (nothing the
+# repo removed is kept).
 #
 # What it does:
 #   1. Makes sure this repo lives at ~/.oh-my-zsh and its plugin/theme submodules are cloned.
@@ -32,11 +44,20 @@ set -euo pipefail
 shopt -s nullglob
 
 UNINSTALL=false
+UPDATE=false
+NO_PULL=false
+ASSUME_YES=false
+TOOL_ARG=""
 for arg in "$@"; do
   case "$arg" in
     --uninstall) UNINSTALL=true ;;
+    --update)    UPDATE=true ;;
+    --no-pull)   NO_PULL=true ;;   # internal: set when re-exec'd after pulling
+    -y|--yes)    ASSUME_YES=true ;;
+    --tool=*)    TOOL_ARG="${arg#--tool=}" ;;  # claude | codex | pi | none
     *)
       echo "error: unknown argument '$arg'"
+      echo "usage: install.sh [--update] [--yes] [--tool=claude|codex|pi|none] [--uninstall]"
       exit 1
       ;;
   esac
@@ -62,13 +83,21 @@ if ! $UNINSTALL; then
 
   cd "$OMZ_DIR"
 
+  if $UPDATE && ! $NO_PULL && [[ -d .git ]]; then
+    export OMZ_OLD_HEAD="$(git rev-parse HEAD)"
+    echo "Updating repo (git pull --ff-only)..."
+    git pull --ff-only || echo "warning: git pull failed (local changes/diverged?); continuing with the current checkout."
+    # Re-exec so the (possibly updated) script is what actually runs.
+    exec "$OMZ_DIR/install.sh" --no-pull "$@"
+  fi
+
   # -------------------------------------------------------------------------
   # 1. Make sure plugin/theme submodules are cloned
   # -------------------------------------------------------------------------
 
   if [[ -d .git ]]; then
     echo "Initializing/updating git submodules (plugins + powerlevel10k)..."
-    git submodule update --init --recursive
+    :
   else
     echo "warning: $OMZ_DIR is not a git repo; skipping submodule init. Plugins under custom/plugins may be missing/empty."
   fi
@@ -95,15 +124,36 @@ STATE_FILE="$HOME/.oh-my-zsh-install-state"
 # 3. Helpers to install/merge a dotfile
 # ---------------------------------------------------------------------------
 
+BASE_DIR="$HOME/.oh-my-zsh-install-base"
+
 # record_state DEST BACKUP_OR_NONE
+# Only the FIRST entry per dest is kept, so --uninstall always restores the
+# original pre-install file even after many updates.
 record_state() {
+  [[ -f "$STATE_FILE" ]] && grep -qF "$1|" "$STATE_FILE" && return 0
   echo "$1|$2" >> "$STATE_FILE"
 }
 
-# The selected one-shot LLM CLI for smart merges. We wait to prompt until a
-# merge is actually needed, so a clean install has no unnecessary question.
+ask_yes() {
+  $ASSUME_YES && return 0
+  [[ -t 0 ]] || return 1
+  local reply
+  read -r -p "$1 [y/N] " reply || return 1
+  [[ "$reply" =~ ^[Yy]$ ]]
+}
+
+# The selected one-shot LLM CLI for conflict/merge resolution. We wait to
+# prompt until a merge is actually needed.
 MERGE_TOOL=""
 MERGE_TOOL_DECIDED=false
+
+if [[ -n "$TOOL_ARG" ]]; then
+  MERGE_TOOL_DECIDED=true
+  if [[ "$TOOL_ARG" != none ]]; then
+    if command -v "$TOOL_ARG" >/dev/null 2>&1; then MERGE_TOOL="$TOOL_ARG"
+    else echo "warning: --tool=$TOOL_ARG not found; AI merging disabled."; fi
+  fi
+fi
 
 choose_merge_tool() {
   local -a tools=()
@@ -117,7 +167,7 @@ choose_merge_tool() {
   (( ${#tools[@]} )) || return 0
 
   if [[ ! -t 0 ]]; then
-    echo "  Detected ${tools[*]} CLI, but installation is non-interactive; AI merging is disabled."
+    echo "  Detected ${tools[*]} CLI, but this is non-interactive; pass --tool=<name> to enable AI merging."
     return 0
   fi
 
@@ -154,6 +204,22 @@ run_merge_tool() {
   esac
 }
 
+# ai_merge PROMPT OUT_FILE  -> 0 if the tool produced sane output
+ai_merge() {
+  local prompt="$1" out="$2"
+  $MERGE_TOOL_DECIDED || choose_merge_tool
+  [[ -n "$MERGE_TOOL" ]] || return 1
+  echo "  Note: this sends file contents (which may include secrets) to $MERGE_TOOL in one-shot mode."
+  ask_yes "  Use $MERGE_TOOL for this merge?" || return 1
+  run_merge_tool "$MERGE_TOOL" "$prompt" > "$out" || return 1
+  [[ -s "$out" ]] || return 1
+  # Reject leftover conflict markers or markdown fences.
+  if grep -qE '^(<<<<<<<|>>>>>>>)|^```' "$out"; then return 1; fi
+  # Syntax check when possible.
+  if command -v zsh >/dev/null 2>&1; then zsh -n "$out" 2>/dev/null || return 1; fi
+  return 0
+}
+
 # append_fallback SRC DEST LABEL
 append_fallback() {
   local src="$1" dest="$2" label="$3"
@@ -166,9 +232,21 @@ append_fallback() {
   echo "  !! Please review $dest by hand: your old config is above, the new one below, and there may be duplicate/conflicting settings."
 }
 
+save_base() { mkdir -p "$BASE_DIR"; cp "$1" "$BASE_DIR/$(basename "$2")"; }
+
+# apply_result NEW_CONTENT DEST BACKUP LABEL HOWTO
+apply_result() {
+  local new="$1" dest="$2" backup="$3" label="$4" how="$5"
+  echo "  Changes to $dest:"
+  diff -u "$dest" "$new" | sed 's/^/    /' | head -60 || true
+  cp "$new" "$dest"
+  echo "  -> $label updated ($how). Old file kept at $backup"
+}
+
 # install_dotfile SRC DEST LABEL
 install_dotfile() {
   local src="$1" dest="$2" label="$3"
+  local name; name="$(basename "$src")"
 
   if [[ ! -f "$src" ]]; then
     echo "  -> skipping $label: $src not found in repo."
@@ -178,34 +256,91 @@ install_dotfile() {
   if [[ ! -s "$dest" ]]; then
     cp "$src" "$dest"
     record_state "$dest" "NONE"
+    save_base "$src" "$src"
     echo "  -> installed $label to $dest"
     return
   fi
 
-  echo "$dest already exists and is not empty."
+  if cmp -s "$src" "$dest"; then
+    save_base "$src" "$src"
+    echo "  -> $label already up to date."
+    return
+  fi
 
-  # Preserve the pre-existing file no matter which merge path is taken below.
+  # Find the base: repo version installed last time, else the pre-pull commit.
+  local base="" tmpbase=""
+  if [[ -f "$BASE_DIR/$name" ]]; then
+    base="$BASE_DIR/$name"
+  elif [[ -n "${OMZ_OLD_HEAD:-}" ]]; then
+    tmpbase="$(mktemp)"
+    if git -C "$OMZ_DIR" show "$OMZ_OLD_HEAD:$name" > "$tmpbase" 2>/dev/null; then base="$tmpbase"
+    else rm -f "$tmpbase"; tmpbase=""; fi
+  fi
+
+  # Repo version unchanged since last install: local file is just customized.
+  if [[ -n "$base" ]] && cmp -s "$base" "$src"; then
+    echo "  -> $label: repo version unchanged; keeping your local $dest as is."
+    save_base "$src" "$src"
+    [[ -z "$tmpbase" ]] || rm -f "$tmpbase"
+    return
+  fi
+
+  echo "$dest differs from the repo version."
   local backup="${dest}.bak.$(date +%Y%m%d%H%M%S)"
   cp "$dest" "$backup"
   record_state "$dest" "$backup"
 
-  if ! $MERGE_TOOL_DECIDED; then
-    choose_merge_tool
+  local out; out="$(mktemp)"
+
+  if [[ -n "$base" ]]; then
+    # 3-way merge: local changes are kept, upstream additions AND removals apply.
+    local rc=0
+    git merge-file -p -L "local ($dest)" -L "previous repo version" -L "new repo version" \
+      "$dest" "$base" "$src" > "$out" || rc=$?
+    if (( rc == 0 )); then
+      apply_result "$out" "$dest" "$backup" "$label" "3-way merge, no conflicts"
+      save_base "$src" "$src"
+    elif (( rc > 0 )); then
+      echo "  3-way merge of $label has $rc conflict(s)."
+      local prompt="Resolve the git merge conflicts in this shell config file ($dest). The sections between <<<<<<< and >>>>>>> show the LOCAL machine version and the NEW repo version. Prefer the NEW repo version on genuine conflicts, but keep machine-local additions (exports, secrets, PATH entries). Anything the new repo version deliberately removed must stay removed. Output ONLY the final raw file, no explanation, no markdown fences, no conflict markers.
+
+$(cat "$out")"
+      local res; res="$(mktemp)"
+      if ai_merge "$prompt" "$res"; then
+        apply_result "$res" "$dest" "$backup" "$label" "conflicts resolved by $MERGE_TOOL; please verify"
+        save_base "$src" "$src"
+      else
+        # Deterministic fallback: new repo file + lines you added locally.
+        # Anything the repo removed stays removed.
+        { cat "$src"
+          local extra; extra="$(diff --unchanged-line-format= --old-line-format= --new-line-format='%L' "$base" "$dest" | grep -vxFf "$src" | grep -v '^[[:space:]]*$' | grep -v '^# ---- Local additions' || true)"
+          if [[ -n "$extra" ]]; then
+            echo ""
+            echo "# ---- Local additions kept by install.sh on $(date) ----"
+            echo "$extra"
+          fi
+        } > "$res"
+        apply_result "$res" "$dest" "$backup" "$label" "new repo version + your local-only lines (conflict fallback)"
+        save_base "$src" "$src"
+      fi
+      rm -f "$res"
+    else
+      cp "$src" "$dest.new"
+      echo "  -> merge failed; left $dest untouched. New repo version at $dest.new"
+    fi
+    rm -f "$out"; [[ -z "$tmpbase" ]] || rm -f "$tmpbase"
+    return
   fi
 
-  if [[ -n "$MERGE_TOOL" ]]; then
-    echo "  '$MERGE_TOOL' can merge your existing $label with the new one intelligently instead of just appending."
-    echo "  Note: this sends the full contents of both files (existing $dest may contain secrets/API keys) to $MERGE_TOOL in one-shot mode."
-    read -r -p "  Use $MERGE_TOOL to merge $label? [y/N] " reply
-    if [[ "$reply" =~ ^[Yy]$ ]]; then
-      local prompt
-      prompt="You are merging two shell config files, both meant to end up as $dest.
+  # No base known (first install onto a pre-existing file): AI merge or append.
+  local prompt="You are merging two shell config files, both meant to end up as $dest.
 FILE A is the user's EXISTING file already on this machine.
 FILE B is the NEW file being installed from the user's personal dotfiles repo.
 
 Merge them into a single valid file that:
-- keeps every export, alias, PATH addition, and plugin/tool setup from BOTH files
-- de-duplicates exact duplicate lines and obviously-conflicting settings (same variable set twice, same plugin listed twice), preferring FILE B's value on a genuine conflict since it's the newer config
+- treats FILE B as authoritative: it is fine to DROP lines/blocks from A that B no longer has or that are superseded by B (old hardcoded tokens, obsolete wrappers, etc.)
+- still keeps clearly machine-local content from A (secrets, API keys, local PATH additions, tool setup) that doesn't conflict with B
+- de-duplicates exact duplicate lines and conflicting settings (same variable set twice, same plugin listed twice), preferring FILE B's value on a genuine conflict
 - preserves existing comments and structure where reasonable
 - is a plain, directly-sourceable shell file
 
@@ -217,27 +352,14 @@ $(cat "$dest")
 ===== FILE B (new, from $src) =====
 $(cat "$src")
 "
-
-      local tmp_out
-      tmp_out="$(mktemp)"
-      if run_merge_tool "$MERGE_TOOL" "$prompt" > "$tmp_out" && [[ -s "$tmp_out" ]]; then
-        cp "$tmp_out" "$dest"
-        rm -f "$tmp_out"
-        echo "  -> merged $label using $MERGE_TOOL. Your old file was kept at $backup"
-        echo "  !! Please double-check $dest — an LLM did this merge, verify it looks right."
-        return
-      else
-        rm -f "$tmp_out"
-        echo "  $MERGE_TOOL merge failed or produced no output; falling back to appending instead."
-        append_fallback "$src" "$dest" "$label"
-        echo "  Your old file was kept at $backup"
-        return
-      fi
-    fi
+  if ai_merge "$prompt" "$out"; then
+    apply_result "$out" "$dest" "$backup" "$label" "merged by $MERGE_TOOL; please verify"
+  else
+    append_fallback "$src" "$dest" "$label"
+    echo "  Your old file was kept at $backup"
   fi
-
-  append_fallback "$src" "$dest" "$label"
-  echo "  Your old file was kept at $backup"
+  save_base "$src" "$src"
+  rm -f "$out"
 }
 
 # uninstall_dotfile DEST BACKUP_OR_NONE
@@ -274,14 +396,15 @@ if $UNINSTALL; then
   done < "$STATE_FILE"
 
   rm -f "$STATE_FILE"
+  rm -rf "$BASE_DIR"
 
   echo ""
   echo "Uninstall done. $OMZ_DIR and its submodules were left untouched — remove that yourself if you want it fully gone."
   exit 0
 fi
 
-# Fresh state for this install run (so re-running install doesn't pile up stale entries).
-: > "$STATE_FILE"
+# Keep any existing state file: it holds the ORIGINAL backups for --uninstall.
+touch "$STATE_FILE"
 
 # ---------------------------------------------------------------------------
 # 4. Install oh-my-posh via Homebrew if it's missing
@@ -308,8 +431,7 @@ if ! command -v oh-my-posh >/dev/null 2>&1; then
   if [[ -n "$BREW_BIN" ]]; then
     echo ""
     echo "oh-my-posh isn't installed, but the .$OS.zshrc being installed uses it as the prompt."
-    read -r -p "Install it now via 'brew install oh-my-posh'? [y/N] " reply
-    if [[ "$reply" =~ ^[Yy]$ ]]; then
+    if ask_yes "Install it now via 'brew install oh-my-posh'?"; then
       "$BREW_BIN" install oh-my-posh
     else
       echo "  -> skipping oh-my-posh install. The prompt line in .$OS.zshrc will fail until you install it yourself."
