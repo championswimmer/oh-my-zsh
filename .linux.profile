@@ -53,7 +53,6 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 export EDITOR=nano
 # export EDITOR="/opt/homebrew/bin/zed -w"
 
-export GITHUB_TOKEN=""
 export VSCODE_MARKETPLACE_TOKEN="" # "xxx"
 
 # AI Keys
@@ -111,6 +110,9 @@ export PATH="$PATH:/home/championswimmer/.lmstudio/bin"
 # End of LM Studio CLI section
 
 eval "$(env-sync load --quiet 2>/dev/null)"
+
+# Let coding agents use their native TUIs (worktrunk-herdr).
+export HERDR_USE_TUI_COMPAT_CODING_AGENT=0
 
 # Added by Antigravity CLI installer
 export PATH="$HOME/.local/bin:$PATH"

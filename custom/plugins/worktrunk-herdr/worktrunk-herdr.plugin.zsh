@@ -18,9 +18,9 @@
 
 eval "$(command wt config shell init zsh)"
 
-# 1: use scrollback-compatible agent UIs; 0: leave UI settings untouched.
+# 1: use scrollback-compatible agent UIs; 0 (default): leave UI settings untouched.
 # Set before loading the plugin, or change it at runtime.
-: ${HERDR_USE_TUI_COMPAT_CODING_AGENT:=1}
+: ${HERDR_USE_TUI_COMPAT_CODING_AGENT:=0}
 
 typeset -ga _WT_AGENTS=(claude codex pi)
 

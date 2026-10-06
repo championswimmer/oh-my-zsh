@@ -139,7 +139,6 @@ else
 fi
 
 
-export GITHUB_TOKEN=""
 export VSCODE_MARKETPLACE_TOKEN="" # "xxx"
 
 # AI Keys
@@ -184,18 +183,6 @@ export PATH="${PATH}:$HOME/.pub-cache/bin"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:${PATH}"
 alias curltime="curl -w \"@$HOME/.curl-time-format.txt\" -o /dev/null -s "
 alias hs="npx live-server"
-
-function hub() {
-  if [[ $(pwd) =~ "$HOME/Development/Viacom18.*" ]]; then
-	  	GHU="Arnav-Gupta_viacom18"
-    	GHT=$V18_GITHUB_TOKEN
-  	else
-		GHU="championswimmer"
-	  	GHT=$GITHUB_TOKEN
-  	fi
-
-  GITHUB_USER=$GHU GITHUB_TOKEN=$GHT command hub "$@"
-}
 
 alias gh_cli=$(which gh)
 
