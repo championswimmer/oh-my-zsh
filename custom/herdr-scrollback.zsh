@@ -32,6 +32,7 @@ _herdr_scrollback_flags() {
 fi
 
 [[ -n ${HERDR_ENV-} ]] || return 0
+[[ ${HERDR_USE_TUI_COMPAT_CODING_AGENT-0} == 1 ]] || return 0
 
 export CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
 
