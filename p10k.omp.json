@@ -26,7 +26,7 @@
           "powerline_symbol": "\ue0b0",
           "background": "#1c1c1c",
           "foreground": "#dadada",
-          "template": " {{.Icon}} "
+          "template": " {{.Icon}} {{ if or (contains \"mac-mini\" .HostName) (contains \"macmini\" .HostName) }}{{ else }}{{ end }} "
         },
         {
           "type": "path",
