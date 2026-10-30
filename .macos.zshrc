@@ -176,7 +176,6 @@ alias ls='ls --color -p'
 
 command -v rbenv >/dev/null 2>&1 && eval "$(rbenv init -)"
 
-unalias git
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
