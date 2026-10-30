@@ -1,13 +1,4 @@
 export PATH="$HOME/.local/bin:$PATH"
-export GITHUB_USER="championswimmer"
-
-# Let Hub reuse the active championswimmer token from GitHub CLI without
-# copying the credential into this file or exporting it to every process.
-hub() {
-  local github_token
-  github_token="$(command gh auth token --hostname github.com --user championswimmer)" || return
-  GITHUB_TOKEN="$github_token" command hub "$@"
-}
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$(go env GOPATH)/bin
