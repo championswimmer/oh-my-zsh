@@ -91,7 +91,7 @@ plugins=(
 	dotenv
 	direnv
 #	git
-	github
+	gh
 	zsh-completions
 	brew
 	docker
