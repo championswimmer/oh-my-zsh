@@ -49,6 +49,16 @@ function git_main_branch() {
   return 1
 }
 
+function gbcopy() {
+  command git rev-parse --git-dir &>/dev/null || return
+
+  local branch
+  branch="$(git_current_branch)" || return
+  [[ -n "$branch" ]] || return 1
+
+  print -rn -- "$branch" | clipcopy
+}
+
 function grename() {
   if [[ -z "$1" || -z "$2" ]]; then
     echo "Usage: $0 old_branch new_branch"
@@ -239,9 +249,11 @@ alias glod='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgre
 alias glola='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
 alias glols='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
 alias glol='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
+alias glolm='git log $(git_main_branch) --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
 alias glo='git log --oneline --decorate'
 alias glog='git log --oneline --decorate --graph'
 alias gloga='git log --oneline --decorate --graph --all'
+alias glom='git log --oneline --decorate --color $(git_main_branch)..'
 
 # Pretty log messages
 function _git_log_prettily(){
@@ -351,6 +363,8 @@ alias grbd='git rebase $(git_develop_branch)'
 alias grbm='git rebase $(git_main_branch)'
 alias grbom='git rebase origin/$(git_main_branch)'
 alias grbum='git rebase upstream/$(git_main_branch)'
+alias grbmi='git rebase $(git_main_branch) --interactive'
+alias grbmia='git rebase $(git_main_branch) --interactive --autosquash'
 alias grf='git reflog'
 alias gr='git remote'
 alias grv='git remote --verbose'
@@ -378,6 +392,7 @@ alias grm='git rm'
 alias grmc='git rm --cached'
 alias gcount='git shortlog --summary --numbered'
 alias gsh='git show'
+alias gshs='git show --stat'
 alias gsps='git show --pretty=short --show-signature'
 alias gstall='git stash --all'
 alias gstaa='git stash apply'
@@ -393,8 +408,10 @@ alias gsts='git stash show --patch'
 alias gst='git status'
 alias gss='git status --short'
 alias gsb='git status --short --branch'
+alias gsnut='git status --untracked-files=no'
 alias gsi='git submodule init'
 alias gsu='git submodule update'
+alias gsuri='git submodule update --recursive --init'
 alias gsd='git svn dcommit'
 alias git-svn-dcommit-push='git svn dcommit && git push github $(git_main_branch):svntrunk'
 alias gsr='git svn rebase'

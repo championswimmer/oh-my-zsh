@@ -48,6 +48,11 @@ fi
 0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
 0="${${(M)0:#/*}:-$PWD/$0}"
 
+# Make sure the cache directory exists; when the plugin is loaded by a
+# standalone plugin manager (e.g. antigen) the core is not sourced, so
+# $ZSH_CACHE_DIR/completions may not have been created yet (#13679).
+[[ -d "$ZSH_CACHE_DIR/completions" ]] || mkdir -p "$ZSH_CACHE_DIR/completions"
+
 # If the completion file doesn't exist yet, we need to autoload it and
 # bind it to `docker`. Otherwise, compinit will have already done that.
 if [[ ! -f "$ZSH_CACHE_DIR/completions/_docker" ]]; then
@@ -68,7 +73,7 @@ zmodload -F zsh/files b:zf_mv
     ! is-at-least 23.0.0 ${${(s:,:z)"$(command docker --version)"}[3]}; then
         command cp "${plugin_dir}/completions/_docker" "$ZSH_CACHE_DIR/completions/_docker"
       else
-        local TMPPREFIX="$ZSH_CACHE_DIR/completions/_docker"
-        zf_mv -f -- =( command docker completion zsh ) "$TMPPREFIX"
+        local TMPPREFIX="$ZSH_CACHE_DIR/completions/._docker"
+        zf_mv -f -- =( command docker completion zsh ) "$ZSH_CACHE_DIR/completions/_docker"
   fi
 } "${0:A:h}" &|

@@ -103,10 +103,12 @@ plugins=(... git)
 | `glods`                | `git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ad) %C(bold blue)<%an>%Creset' --date=short`           |
 | `glol`                 | `git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'`                        |
 | `glola`                | `git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --all`                  |
+| `glolm`                | `git log $(git_main_branch) --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'`     |
 | `glols`                | `git log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --stat`                 |
 | `glo`                  | `git log --oneline --decorate`                                                                                                  |
 | `glog`                 | `git log --oneline --decorate --graph`                                                                                          |
 | `gloga`                | `git log --oneline --decorate --graph --all`                                                                                    |
+| `glom`                 | `git log --oneline --decorate --color $(git_main_branch)..`                                                                     |
 | `glp`                  | `git log --pretty=<format>`                                                                                                     |
 | `glg`                  | `git log --stat`                                                                                                                |
 | `glgp`                 | `git log --stat --patch`                                                                                                        |
@@ -154,6 +156,8 @@ plugins=(... git)
 | `grba`                 | `git rebase --abort`                                                                                                            |
 | `grbc`                 | `git rebase --continue`                                                                                                         |
 | `grbi`                 | `git rebase --interactive`                                                                                                      |
+| `grbmi`                | `git rebase $(git_main_branch) --interactive`                                                                                   |
+| `grbmia`               | `git rebase $(git_main_branch) --interactive --autosquash`                                                                      |
 | `grbo`                 | `git rebase --onto`                                                                                                             |
 | `grbs`                 | `git rebase --skip`                                                                                                             |
 | `grbd`                 | `git rebase $(git_develop_branch)`                                                                                              |
@@ -187,6 +191,7 @@ plugins=(... git)
 | `grmc`                 | `git rm --cached`                                                                                                               |
 | `gcount`               | `git shortlog --summary -n`                                                                                                     |
 | `gsh`                  | `git show`                                                                                                                      |
+| `gshs`                 | `git show --stat`                                                                                                               |
 | `gsps`                 | `git show --pretty=short --show-signature`                                                                                      |
 | `gstall`               | `git stash --all`                                                                                                               |
 | `gstu`                 | `git stash --include-untracked`                                                                                                 |
@@ -201,8 +206,10 @@ plugins=(... git)
 | `gst`                  | `git status`                                                                                                                    |
 | `gss`                  | `git status --short`                                                                                                            |
 | `gsb`                  | `git status --short -b`                                                                                                         |
+| `gsnut`                | `git status --untracked-files=no`                                                                                               |
 | `gsi`                  | `git submodule init`                                                                                                            |
 | `gsu`                  | `git submodule update`                                                                                                          |
+| `gsuri`                | `git submodule update --recursive --init`                                                                                       |
 | `gsd`                  | `git svn dcommit`                                                                                                               |
 | `git-svn-dcommit-push` | `git svn dcommit && git push github $(git_main_branch):svntrunk`                                                                |
 | `gsr`                  | `git svn rebase`                                                                                                                |
@@ -254,6 +261,7 @@ receive further support.
 | `git_current_user_name`  | Returns the `user.name` config value (Lives in `lib/git.zsh`)                                                  |
 | `git_develop_branch`     | Returns the name of the “development” branch: `dev`, `devel`, `development` if they exist, `develop` otherwise |
 | `git_main_branch`        | Returns the name of the main branch: `main` if it exists, `master` otherwise                                   |
+| `gbcopy`                 | Copies current branch name to clipboard                                                                        |
 | `grename <old> <new>`    | Renames branch `<old>` to `<new>`, including on the origin remote                                              |
 | `gbda`                   | Deletes all merged branches                                                                                    |
 | `gbds`                   | Deletes all squash-merged branches (**Note: performance degrades with number of branches**)                    |

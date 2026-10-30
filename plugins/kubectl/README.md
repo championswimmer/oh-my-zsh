@@ -23,6 +23,7 @@ plugins=(... kubectl)
 | kcsc     | `kubectl config set-context`                            | Set a context entry in kubeconfig                                                                |
 | kcdc     | `kubectl config delete-context`                         | Delete the specified context from the kubeconfig                                                 |
 | kccc     | `kubectl config current-context`                        | Display the current-context                                                                      |
+| kcrc     | `kubectl config rename-context`                         | Rename a context from the kubeconfig file                                                        |
 | kcgc     | `kubectl config get-contexts`                           | List of contexts available                                                                       |
 |          |                                                         | **General aliases**                                                                              |
 | kdel     | `kubectl delete`                                        | Delete resources by filenames, stdin, resources and names, or by resources and label selector    |
@@ -130,7 +131,7 @@ plugins=(... kubectl)
 | kdss     | `kubectl describe statefulset`                          | Describe statefulset resource in detail                                                          |
 | kdelss   | `kubectl delete statefulset`                            | Delete the statefulset                                                                           |
 | ksss     | `kubectl scale statefulset`                             | Scale a statefulset                                                                              |
-| krsss    | `kubectl rollout status statefulset`                    | Check the rollout status of a deployment                                                         |
+| krsss    | `kubectl rollout status statefulset`                    | Check the rollout status of a statefulset                                                        |
 | krrss    | `kubectl rollout restart statefulset`                   | Rollout restart a statefulset                                                                    |
 |          |                                                         | **Service Accounts management**                                                                  |
 | kdsa     | `kubectl describe sa`                                   | Describe a service account in details                                                            |

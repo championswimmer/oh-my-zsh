@@ -13,8 +13,8 @@ fi
 
 zmodload -F zsh/files b:zf_mv
 () {
-  local TMPPREFIX="$ZSH_CACHE_DIR/completions/_jj"
-  zf_mv -f -- =( COMPLETE=zsh jj ) "$TMPPREFIX"
+  local TMPPREFIX="$ZSH_CACHE_DIR/completions/._jj"
+  zf_mv -f -- =( COMPLETE=zsh jj ) "$ZSH_CACHE_DIR/completions/_jj"
 } &|
 
 function __jj_prompt_jj() {
@@ -81,7 +81,7 @@ alias jjop='jj op'
 alias jjopl='jj op log'
 alias jjor='jj op restore'
 alias jjrb='jj rebase'
-alias jjrbm='jj rebase -d "trunk()"'
+alias jjrbm='jj rebase -o "trunk()"'
 alias jjrs='jj restore'
 alias jjrt='cd "$(jj root || echo .)"'
 alias jjs='jj show'
