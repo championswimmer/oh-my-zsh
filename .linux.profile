@@ -41,11 +41,12 @@ fi
 
 
 # Android
-export ANDROID_HOME="$HOME/Library/Android/sdk"
+export ANDROID_HOME="/usr/lib/android-sdk"
 export PATH="$ANDROID_HOME/platform-tools:$PATH"
-export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-export PATH="$ANDROID_HOME/build-tools/latest:$PATH"
-export PATH="$ANDROID_HOME/emulator:$PATH"
+export PATH="$ANDROID_HOME/build-tools/35.0.1:$PATH"
+export PATH="$ANDROID_HOME/cmdline-tools/19.0/bin:$PATH"
+export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
+export PATH="$ANDROID_NDK_HOME:$PATH"
 
 export CLICOLOR=1
 export LSCOLORS=ExFxCxDxBxegedabagacad
