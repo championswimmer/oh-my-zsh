@@ -152,6 +152,9 @@ bindkey '^@' llm_suggest # bind Option+Space to suggest
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
+# Override the invalid bare "UTF-8" LC_CTYPE forwarded by macOS terminals over ssh.
+export LANG=en_GB.UTF-8
+export LC_CTYPE=en_GB.UTF-8
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then

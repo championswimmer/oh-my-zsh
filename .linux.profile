@@ -11,6 +11,8 @@
 # Locale (fixes UTF-8 warnings)
 export LANG=en_GB.UTF-8
 export LC_ALL=en_GB.UTF-8
+# macOS terminals forward LC_CTYPE=UTF-8 over ssh, which is not a valid Linux locale
+export LC_CTYPE=en_GB.UTF-8
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
