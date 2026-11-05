@@ -150,10 +150,7 @@ export GROQ_API_KEY=""
 export OPENAI_API_KEY="" # "sk-proj--"
 export XAI_API_KEY="" # "xai-"
 export PERPLEXITY_API_KEY="" # "pplx-"
-export DEEPINFRA_API_KEY=""
 export OPENROUTER_API_KEY="" # "sk-or-v1-"
-export CEREBRAS_API_KEY=""
-export MINIMAX_API_KEY=""
 
 # API Keys
 export GOOGLE_MAPS_API_KEY=""
